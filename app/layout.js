@@ -2,6 +2,8 @@ import '../styles/globals.css';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Sidebar from '../components/Sidebar';
+import FiltrePays from '../components/FiltrePays';
 
 export const metadata = {
   title: 'IthaMedia',
@@ -11,11 +13,21 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="fr">
-      <body>
+      <body className="">
+        {/* Sidebar pour Desktop */}
+        <Sidebar />
+        {/* Contenu principal */}
+        <div className="flex-1 md:ml-64"> {/* Ajout d'un margin gauche pour desktop */}
         <Header />
-        <main className="bg-background min-h-screen">{children}</main>
-        <Footer />
+          <div className="container mx-auto mt-16 p-4">
+            <FiltrePays />
+            {children}
+          </div>
+        </div>
+        {/* <Footer /> */}
       </body>
     </html>
   );
 }
+
+
