@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Signer PDF</string>
+    <string name="open_pdf">Ouvrir</string>
+    <string name="add_signature">Signer</string>
+    <string name="save_pdf">Enregistrer</string>
+    <string name="previous_page">Page précédente</string>
+    <string name="next_page">Page suivante</string>
+    <string name="page_indicator">Page %1$d / %2$d</string>
+    <string name="empty_state">Ouvrez un PDF pour commencer.\n\n1. Ouvrir un document\n2. Dessiner votre signature\n3. Glisser-la à l\'endroit voulu (coin pour redimensionner, appui long pour supprimer)\n4. Enregistrer le PDF signé</string>
+    <string name="draw_signature">Dessinez votre signature</string>
+    <string name="clear">Effacer</string>
+    <string name="cancel">Annuler</string>
+    <string name="validate">Valider</string>
+    <string name="signature_empty">La signature est vide</string>
+    <string name="color_black">Noir</string>
+    <string name="color_blue">Bleu</string>
+    <string name="remember_signature">Mémoriser cette signature</string>
+    <string name="choose_signature">Signature</string>
+    <string name="use_saved_signature">Utiliser la signature mémorisée</string>
+    <string name="draw_new_signature">Dessiner une nouvelle signature</string>
+    <string name="hint_place">Glissez la signature ; tirez le coin pour la redimensionner</string>
+    <string name="signature_removed">Signature retirée</string>
+    <string name="no_signature_placed">Ajoutez au moins une signature avant d\'enregistrer</string>
+    <string name="saving">Enregistrement…</string>
+    <string name="saved">PDF signé enregistré</string>
+    <string name="open">Ouvrir</string>
+    <string name="error_open">Impossible d\'ouvrir ce PDF : %1$s</string>
+    <string name="error_save">Échec de l\'enregistrement : %1$s</string>
+    <string name="no_viewer">Aucune application pour afficher le PDF</string>
+</resources>

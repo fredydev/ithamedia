@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Feuille -->
+    <path android:fillColor="#FFFFFF" android:pathData="M36,28h28l10,10v42h-38z" />
+    <path android:fillColor="#C9D5F7" android:pathData="M64,28v10h10z" />
+    <!-- Lignes de texte -->
+    <path android:fillColor="#C9D5F7" android:pathData="M42,44h22v3h-22zM42,51h26v3h-26zM42,58h18v3h-18z" />
+    <!-- Trait de signature -->
+    <path android:strokeColor="#1E4FD8" android:strokeWidth="2.5" android:strokeLineCap="round"
+        android:pathData="M42,72c3,-6 6,-6 7,-1s4,4 7,-2 5,-3 6,1 3,2 6,-1" />
+</vector>
