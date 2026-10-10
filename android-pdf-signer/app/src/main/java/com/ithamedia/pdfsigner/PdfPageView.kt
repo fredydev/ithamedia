@@ -84,12 +84,16 @@ class PdfPageView @JvmOverloads constructor(
         }
     })
 
-    /** Ajoute une signature centrée sur la page affichée, large de 35 % de la page. */
-    fun addPlacement(signature: Bitmap) {
+    /** Ajoute une image (signature ou texte) centrée sur la page, large de [widthFraction] de la page. */
+    fun addPlacement(signature: Bitmap, widthFraction: Float = 0.35f) {
         if (pageBitmap == null) return
         computePageRect()
-        val w = 0.35f
-        val h = normalizedHeight(signature, w)
+        var w = widthFraction.coerceIn(0.05f, 0.9f)
+        var h = normalizedHeight(signature, w)
+        if (h > 0.9f) {
+            w *= 0.9f / h
+            h = 0.9f
+        }
         val p = Placement(signature, (1f - w) / 2f, ((1f - h) / 2f).coerceAtLeast(0f), w, h)
         placements += p
         selected = p

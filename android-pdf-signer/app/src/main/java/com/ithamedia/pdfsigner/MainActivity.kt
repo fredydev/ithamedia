@@ -20,32 +20,41 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.math.max
 import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
 
+    private companion object {
+        const val KEY_PLACE = "last_place"
+    }
+
     private lateinit var toolbar: MaterialToolbar
     private lateinit var pageView: PdfPageView
-    private lateinit var emptyState: TextView
+    private lateinit var emptyState: View
     private lateinit var progress: View
     private lateinit var pageNav: View
     private lateinit var pageIndicator: TextView
     private lateinit var prevPage: Button
     private lateinit var nextPage: Button
     private lateinit var signButton: Button
+    private lateinit var textButton: Button
     private lateinit var saveButton: Button
 
     private var pdfFile: File? = null
@@ -53,9 +62,11 @@ class MainActivity : AppCompatActivity() {
     private var fileDescriptor: ParcelFileDescriptor? = null
     private var renderer: PdfRenderer? = null
     private var currentPage = 0
+    private var pageWidthPts = 0
     private val placementsByPage = HashMap<Int, MutableList<Placement>>()
 
     private val savedSignatureFile by lazy { File(filesDir, "signature.png") }
+    private val prefs by lazy { getSharedPreferences("prefs", MODE_PRIVATE) }
 
     private val openPdf = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { loadPdf(it) }
@@ -80,12 +91,20 @@ class MainActivity : AppCompatActivity() {
         prevPage = findViewById(R.id.prevPage)
         nextPage = findViewById(R.id.nextPage)
         signButton = findViewById(R.id.signButton)
+        textButton = findViewById(R.id.textButton)
         saveButton = findViewById(R.id.saveButton)
 
-        findViewById<Button>(R.id.openButton).setOnClickListener {
-            openPdf.launch(arrayOf("application/pdf"))
+        findViewById<Button>(R.id.openButton).setOnClickListener { pickPdf() }
+        toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_open) {
+                pickPdf()
+                true
+            } else {
+                false
+            }
         }
         signButton.setOnClickListener { chooseSignature() }
+        textButton.setOnClickListener { addText() }
         saveButton.setOnClickListener { requestSave() }
         prevPage.setOnClickListener { showPage(currentPage - 1) }
         nextPage.setOnClickListener { showPage(currentPage + 1) }
@@ -121,6 +140,8 @@ class MainActivity : AppCompatActivity() {
 
     // --- Ouverture et affichage -------------------------------------------------------------
 
+    private fun pickPdf() = openPdf.launch(arrayOf("application/pdf"))
+
     private fun loadPdf(uri: Uri) {
         setBusy(true)
         lifecycleScope.launch {
@@ -151,6 +172,7 @@ class MainActivity : AppCompatActivity() {
                 currentPage = 0
                 emptyState.visibility = View.GONE
                 signButton.isEnabled = true
+                textButton.isEnabled = true
                 saveButton.isEnabled = true
                 toolbar.title = name
                 showPage(0)
@@ -175,6 +197,7 @@ class MainActivity : AppCompatActivity() {
         currentPage = index
 
         val page = r.openPage(index)
+        pageWidthPts = page.width
         // Rendu à ~2x la taille en points, plafonné pour éviter les dépassements mémoire
         val scale = min(2f, 2400f / max(page.width, page.height))
         val bitmap = Bitmap.createBitmap(
@@ -264,6 +287,70 @@ class MainActivity : AppCompatActivity() {
         } catch (_: Exception) {
             // La mémorisation est facultative
         }
+    }
+
+    // --- Texte (date, lieu…) ------------------------------------------------------------------
+
+    private fun addText() {
+        val content = LayoutInflater.from(this).inflate(R.layout.dialog_text, null)
+        val textInput = content.findViewById<TextInputEditText>(R.id.textInput)
+        val placeLayout = content.findViewById<View>(R.id.placeLayout)
+        val placeInput = content.findViewById<TextInputEditText>(R.id.placeInput)
+        val colorGroup = content.findViewById<MaterialButtonToggleGroup>(R.id.colorGroup)
+        val today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+        fun placeDateText() = getString(R.string.place_date_format, placeInput.text.toString().trim(), today)
+        fun setText(value: String) {
+            textInput.setText(value)
+            textInput.setSelection(value.length)
+        }
+
+        content.findViewById<View>(R.id.presetDate).setOnClickListener {
+            placeLayout.visibility = View.GONE
+            setText(today)
+        }
+        content.findViewById<View>(R.id.presetReadApproved).setOnClickListener {
+            placeLayout.visibility = View.GONE
+            setText(getString(R.string.read_approved_text))
+        }
+        content.findViewById<View>(R.id.presetPlaceDate).setOnClickListener {
+            placeLayout.visibility = View.VISIBLE
+            if (placeInput.text.isNullOrEmpty()) placeInput.setText(prefs.getString(KEY_PLACE, ""))
+            setText(placeDateText())
+            if (placeInput.text.isNullOrEmpty()) placeInput.requestFocus()
+        }
+        // Met à jour « Fait à …, le … » pendant la saisie de la ville
+        placeInput.doAfterTextChanged {
+            if (placeLayout.visibility == View.VISIBLE) setText(placeDateText())
+        }
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.text_dialog_title)
+            .setView(content)
+            .setPositiveButton(R.string.add, null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val text = textInput.text.toString().trim()
+                if (text.isEmpty()) {
+                    toast(getString(R.string.text_empty))
+                    return@setOnClickListener
+                }
+                if (placeLayout.visibility == View.VISIBLE) {
+                    prefs.edit().putString(KEY_PLACE, placeInput.text.toString().trim()).apply()
+                }
+                val color = if (colorGroup.checkedButtonId == R.id.colorBlue) R.color.ink_blue else R.color.ink_black
+                val bitmap = TextStamp.render(text, ContextCompat.getColor(this, color))
+                dialog.dismiss()
+                // Taille initiale ≈ corps 12 pt sur la page (le rendu est à 72 px par corps de police)
+                val widthFraction = if (pageWidthPts > 0) bitmap.width * (12f / 72f) / pageWidthPts else 0.35f
+                pageView.addPlacement(bitmap, widthFraction)
+                toast(getString(R.string.hint_place))
+            }
+        }
+        dialog.show()
     }
 
     // --- Enregistrement ----------------------------------------------------------------------

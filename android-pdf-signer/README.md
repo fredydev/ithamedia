@@ -8,8 +8,9 @@ Application Android native (Kotlin) pour signer des documents PDF à la main, di
 - Navigation page par page
 - Dessin de la signature au doigt ou au stylet (encre noire ou bleue)
 - Mémorisation de la signature pour la réutiliser
+- Ajout de texte : date du jour, « Fait à <ville>, le <date> » (ville mémorisée), « Lu et approuvé » ou texte libre
 - Placement libre : glisser pour déplacer, tirer le coin pour redimensionner, appui long pour supprimer
-- Plusieurs signatures, sur une ou plusieurs pages
+- Plusieurs signatures et textes, sur une ou plusieurs pages
 - Enregistrement d'une copie `<nom>_signé.pdf` : la signature est ajoutée au PDF d'origine sans le rasteriser
   (texte sélectionnable et qualité vectorielle conservés), pages pivotées comprises
 
