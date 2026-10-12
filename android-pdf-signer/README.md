@@ -1,23 +1,35 @@
-# Signer PDF — application Android
+# Ithamedia PDF — application Android
 
-Application Android native (Kotlin) pour signer des documents PDF à la main, directement sur le téléphone.
+Boîte à outils PDF native (Kotlin) qui fonctionne entièrement sur le téléphone, hors ligne.
 
-## Fonctionnalités
+## Organisation
 
-- Ouvrir un PDF depuis le stockage, Google Drive, etc. (ou via « Ouvrir avec… » / « Partager » depuis une autre app)
-- Navigation page par page
-- Dessin de la signature au doigt ou au stylet (encre noire ou bleue)
-- Mémorisation de la signature pour la réutiliser
-- Ajout de texte : date du jour, « Fait à <ville>, le <date> » (ville mémorisée), « Lu et approuvé » ou texte libre
-- Placement libre : glisser pour déplacer, tirer le coin pour redimensionner, appui long pour supprimer
-- Plusieurs signatures et textes, sur une ou plusieurs pages
-- Enregistrement d'une copie `<nom>_signé.pdf` : la signature est ajoutée au PDF d'origine sans le rasteriser
-  (texte sélectionnable et qualité vectorielle conservés), pages pivotées comprises
+L'app a deux onglets :
 
-Rendu des pages : `android.graphics.pdf.PdfRenderer`. Écriture : [PdfBox-Android](https://github.com/TomRoush/PdfBox-Android).
+- **Outils** : une grande carte « Scanner un document », la grille des outils et les fichiers récents.
+- **Mes fichiers** : la bibliothèque de l'app, avec des dossiers. Tout ce que créent les outils y est
+  rangé. Chaque fichier a un menu d'actions : ouvrir, signer, réorganiser, compresser, fusionner,
+  partager, enregistrer sur l'appareil, renommer, déplacer, supprimer.
 
-> Il s'agit d'une signature manuscrite apposée (image), pas d'une signature électronique
-> cryptographique (certificat PAdES).
+Chaque outil se termine par le même écran : **Ouvrir · Partager · Enregistrer sur l'appareil**.
+Un PDF reçu par « Ouvrir avec… » ou « Partager » depuis une autre app est importé dans Mes fichiers.
+
+## Outils
+
+| Outil | Ce qu'il fait |
+|---|---|
+| Scanner un document | Scanner intelligent ML Kit : détection des bords, correction de perspective, filtres. Repli sur photo / galerie sans services Google Play. |
+| Images en PDF | Assembler des photos de la galerie, réordonner, pivoter, format A4 ou taille de l'image. |
+| Signer | Signature manuscrite (mémorisable), date, « Fait à …, le … », « Lu et approuvé », texte libre. |
+| Réorganiser | Grille de miniatures : glisser pour déplacer, pivoter, supprimer (avec annulation). |
+| Fusionner | Plusieurs PDF dans l'ordre choisi. |
+| Compresser | Trois niveaux. Seules les images sont recompressées : texte et vecteurs restent intacts. Si aucun gain n'est possible, l'original est conservé. |
+| Word en PDF | Conversion .docx sur l'appareil : styles, mise en forme, listes, tableaux, images, marges. Texte sélectionnable. Pas d'en-têtes/pieds de page, notes ni zones de texte. Les anciens .doc ne sont pas pris en charge. |
+
+La signature est une image apposée sur la page (pas une signature électronique à certificat).
+
+Bibliothèques : `PdfRenderer` (affichage), [PdfBox-Android](https://github.com/TomRoush/PdfBox-Android)
+(écriture), ML Kit Document Scanner (scan).
 
 ## Compiler
 
@@ -28,8 +40,6 @@ cd android-pdf-signer
 ./gradlew assembleDebug
 # APK : app/build/outputs/apk/debug/app-debug.apk
 ```
-
-Ou ouvrir le dossier `android-pdf-signer` dans Android Studio et lancer l'app.
 
 Le workflow GitHub Actions `.github/workflows/android-pdf-signer.yml` compile l'APK à chaque push
 et le publie comme artefact (`pdf-signer-debug-apk`).

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_sign" android:icon="@drawable/ic_signature" android:title="@string/tool_sign" app:showAsAction="ifRoom" />
+    <item android:id="@+id/action_share" android:icon="@drawable/ic_share" android:title="@string/share" app:showAsAction="ifRoom" />
+    <item android:id="@+id/action_more" android:icon="@drawable/ic_more" android:title="@string/more_actions" app:showAsAction="always" />
+</menu>

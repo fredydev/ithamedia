@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:menu="@menu/main"
-        app:title="@string/app_name" />
+    <include layout="@layout/toolbar" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -25,48 +20,30 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <LinearLayout
-            android:id="@+id/emptyState"
+        <TextView
+            android:id="@+id/signHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="32dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:layout_gravity="top|center_horizontal"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_badge"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="8dp"
+            android:text="@string/sign_hint"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="#FFFFFF" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:lineSpacingMultiplier="1.2"
-                android:text="@string/empty_state"
-                android:textAppearance="?attr/textAppearanceBodyLarge" />
-
-            <Button
-                android:id="@+id/openButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/open_pdf_long"
-                app:icon="@drawable/ic_folder_open" />
-        </LinearLayout>
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:visibility="gone" />
+        <include layout="@layout/busy_overlay" />
     </FrameLayout>
 
     <LinearLayout
         android:id="@+id/pageNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainerLow"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:visibility="gone">
+        android:paddingHorizontal="8dp">
 
         <Button
             android:id="@+id/prevPage"
@@ -96,28 +73,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainerLow"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="12dp">
 
         <Button
             android:id="@+id/signButton"
-            style="?attr/materialButtonOutlinedStyle"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_weight="1"
-            android:enabled="false"
             android:text="@string/add_signature"
-            app:icon="@drawable/ic_sign" />
+            app:icon="@drawable/ic_signature" />
 
         <Button
             android:id="@+id/textButton"
-            style="?attr/materialButtonOutlinedStyle"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="4dp"
             android:layout_weight="1"
-            android:enabled="false"
             android:text="@string/add_text"
             app:icon="@drawable/ic_text" />
 
@@ -127,8 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_weight="1"
-            android:enabled="false"
             android:text="@string/save_pdf"
-            app:icon="@drawable/ic_save" />
+            app:icon="@drawable/ic_check" />
     </LinearLayout>
 </LinearLayout>

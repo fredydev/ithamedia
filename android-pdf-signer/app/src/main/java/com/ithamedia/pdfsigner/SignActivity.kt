@@ -1,37 +1,22 @@
 package com.ithamedia.pdfsigner
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDate
@@ -39,26 +24,19 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.max
 import kotlin.math.min
 
-class MainActivity : AppCompatActivity() {
+/** Signer : signature manuscrite et textes (date, lieu…) posés sur les pages. */
+class SignActivity : BaseToolActivity() {
 
     private companion object {
         const val KEY_PLACE = "last_place"
     }
 
-    private lateinit var toolbar: MaterialToolbar
     private lateinit var pageView: PdfPageView
-    private lateinit var emptyState: View
-    private lateinit var progress: View
-    private lateinit var pageNav: View
     private lateinit var pageIndicator: TextView
     private lateinit var prevPage: Button
     private lateinit var nextPage: Button
-    private lateinit var signButton: Button
-    private lateinit var textButton: Button
-    private lateinit var saveButton: Button
 
     private var pdfFile: File? = null
-    private var pdfName: String = "document.pdf"
     private var fileDescriptor: ParcelFileDescriptor? = null
     private var renderer: PdfRenderer? = null
     private var currentPage = 0
@@ -68,54 +46,23 @@ class MainActivity : AppCompatActivity() {
     private val savedSignatureFile by lazy { File(filesDir, "signature.png") }
     private val prefs by lazy { getSharedPreferences("prefs", MODE_PRIVATE) }
 
-    private val openPdf = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let { loadPdf(it) }
-    }
-
-    private val createPdf =
-        registerForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
-            uri?.let { savePdf(it) }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        PDFBoxResourceLoader.init(applicationContext)
+        setupScreen(R.layout.activity_sign, R.string.tool_sign)
 
-        toolbar = findViewById(R.id.toolbar)
         pageView = findViewById(R.id.pageView)
-        emptyState = findViewById(R.id.emptyState)
-        progress = findViewById(R.id.progress)
-        pageNav = findViewById(R.id.pageNav)
         pageIndicator = findViewById(R.id.pageIndicator)
         prevPage = findViewById(R.id.prevPage)
         nextPage = findViewById(R.id.nextPage)
-        signButton = findViewById(R.id.signButton)
-        textButton = findViewById(R.id.textButton)
-        saveButton = findViewById(R.id.saveButton)
 
-        findViewById<Button>(R.id.openButton).setOnClickListener { pickPdf() }
-        toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_open) {
-                pickPdf()
-                true
-            } else {
-                false
-            }
-        }
-        signButton.setOnClickListener { chooseSignature() }
-        textButton.setOnClickListener { addText() }
-        saveButton.setOnClickListener { requestSave() }
+        findViewById<Button>(R.id.signButton).setOnClickListener { chooseSignature() }
+        findViewById<Button>(R.id.textButton).setOnClickListener { addText() }
+        findViewById<Button>(R.id.saveButton).setOnClickListener { save() }
         prevPage.setOnClickListener { showPage(currentPage - 1) }
         nextPage.setOnClickListener { showPage(currentPage + 1) }
-        pageView.onPlacementRemoved = { toast(getString(R.string.signature_removed)) }
+        pageView.onPlacementRemoved = { toast(R.string.signature_removed) }
 
-        if (savedInstanceState == null) handleIncomingIntent(intent)
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleIncomingIntent(intent)
+        startWithPdfInput(savedInstanceState)
     }
 
     override fun onDestroy() {
@@ -123,64 +70,23 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun handleIncomingIntent(intent: Intent?) {
-        val uri: Uri? = when (intent?.action) {
-            Intent.ACTION_VIEW -> intent.data
-            Intent.ACTION_SEND ->
-                if (Build.VERSION.SDK_INT >= 33) {
-                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                }
-            else -> null
-        }
-        uri?.let { loadPdf(it) }
-    }
-
-    // --- Ouverture et affichage -------------------------------------------------------------
-
-    private fun pickPdf() = openPdf.launch(arrayOf("application/pdf"))
-
-    private fun loadPdf(uri: Uri) {
-        setBusy(true)
-        lifecycleScope.launch {
-            try {
-                val name = queryDisplayName(uri) ?: "document.pdf"
-                // Copie locale : PdfRenderer a besoin d'un fichier "seekable", PDFBox le relira à l'enregistrement
-                val file = withContext(Dispatchers.IO) {
-                    val target = File(cacheDir, "source.pdf")
-                    contentResolver.openInputStream(uri).use { input ->
-                        requireNotNull(input) { "flux illisible" }
-                        FileOutputStream(target).use { input.copyTo(it) }
-                    }
-                    target
-                }
-                closeRenderer()
-                val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-                val pdfRenderer = try {
-                    PdfRenderer(fd)
-                } catch (e: Exception) {
-                    fd.close()
-                    throw e
-                }
-                fileDescriptor = fd
-                renderer = pdfRenderer
-                pdfFile = file
-                pdfName = name
-                placementsByPage.clear()
-                currentPage = 0
-                emptyState.visibility = View.GONE
-                signButton.isEnabled = true
-                textButton.isEnabled = true
-                saveButton.isEnabled = true
-                toolbar.title = name
-                showPage(0)
+    override fun onInputPdf(file: File) {
+        try {
+            closeRenderer()
+            val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            renderer = try {
+                PdfRenderer(fd)
             } catch (e: Exception) {
-                toast(getString(R.string.error_open, e.localizedMessage ?: e.javaClass.simpleName))
-            } finally {
-                setBusy(false)
+                fd.close()
+                throw e
             }
+            fileDescriptor = fd
+            pdfFile = file
+            placementsByPage.clear()
+            toolbar.subtitle = file.name
+            showPage(0)
+        } catch (e: Exception) {
+            showError(UserMessageException(getString(R.string.error_open, e.localizedMessage ?: e.javaClass.simpleName)))
         }
     }
 
@@ -212,7 +118,6 @@ class MainActivity : AppCompatActivity() {
         pageView.pageBitmap = bitmap
         pageView.placements = placementsByPage.getOrPut(index) { mutableListOf() }
 
-        pageNav.visibility = View.VISIBLE
         pageIndicator.text = getString(R.string.page_indicator, index + 1, r.pageCount)
         prevPage.isEnabled = index > 0
         nextPage.isEnabled = index < r.pageCount - 1
@@ -355,61 +260,22 @@ class MainActivity : AppCompatActivity() {
 
     // --- Enregistrement ----------------------------------------------------------------------
 
-    private fun requestSave() {
+    private fun save() {
+        val source = pdfFile ?: return
         if (placementsByPage.values.all { it.isEmpty() }) {
-            toast(getString(R.string.no_signature_placed))
+            toast(R.string.no_signature_placed)
             return
         }
-        val base = pdfName.removeSuffix(".pdf").removeSuffix(".PDF")
-        createPdf.launch("${base}_signé.pdf")
-    }
-
-    private fun savePdf(target: Uri) {
-        val source = pdfFile ?: return
         val snapshot = placementsByPage.mapValues { (_, list) -> list.toList() }
-        setBusy(true)
-        lifecycleScope.launch {
+        runTask(getString(R.string.saving), {
+            val output = Library.newOutput(this, "${source.baseName()}_signé.pdf", source)
             try {
-                withContext(Dispatchers.IO) {
-                    contentResolver.openOutputStream(target, "wt").use { out ->
-                        requireNotNull(out) { "destination inaccessible" }
-                        PdfSigner.sign(source, out, snapshot)
-                    }
-                }
-                Snackbar.make(pageView, R.string.saved, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.open) { viewPdf(target) }
-                    .show()
-            } catch (e: Exception) {
-                toast(getString(R.string.error_save, e.localizedMessage ?: e.javaClass.simpleName))
-            } finally {
-                setBusy(false)
+                FileOutputStream(output).use { PdfSigner.sign(source, it, snapshot) }
+            } catch (e: Throwable) {
+                output.delete()
+                throw e
             }
-        }
-    }
-
-    private fun viewPdf(uri: Uri) {
-        val intent = Intent(Intent.ACTION_VIEW)
-            .setDataAndType(uri, "application/pdf")
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        try {
-            startActivity(intent)
-        } catch (_: ActivityNotFoundException) {
-            toast(getString(R.string.no_viewer))
-        }
-    }
-
-    // --- Utilitaires -------------------------------------------------------------------------
-
-    private fun queryDisplayName(uri: Uri): String? =
-        contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
-            if (c.moveToFirst()) c.getString(0) else null
-        }
-
-    private fun setBusy(busy: Boolean) {
-        progress.visibility = if (busy) View.VISIBLE else View.GONE
-    }
-
-    private fun toast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            output
+        }) { output -> showResult(output) }
     }
 }
