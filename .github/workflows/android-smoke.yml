@@ -7,6 +7,9 @@ on:
       - ".github/workflows/android-smoke.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   launch:
     runs-on: ubuntu-latest
@@ -46,3 +49,15 @@ jobs:
             android-pdf-signer/smoke/parcours.mp4
             android-pdf-signer/smoke/crash.txt
             android-pdf-signer/smoke/logcat.txt
+      # Captures et vidéo aussi publiées sur une branche dédiée, consultable directement sur GitHub
+      - name: Publish screenshots branch
+        if: always()
+        working-directory: android-pdf-signer/smoke
+        run: |
+          mkdir -p pub && cp -r screens pub/ && cp parcours.mp4 pub/ 2>/dev/null || true
+          cp crash.txt pub/ 2>/dev/null || true
+          cd pub
+          git init -q -b emulateur-captures
+          git add -A
+          git -c user.name="emulator-ci" -c user.email="ci@users.noreply.github.com" commit -qm "Captures émulateur (${GITHUB_SHA::7})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" emulateur-captures
