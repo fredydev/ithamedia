@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@color/paper"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
@@ -57,7 +57,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurfaceContainerLow"
+        android:background="@drawable/bg_bar"
         android:orientation="vertical"
         android:padding="12dp">
 
@@ -76,7 +76,7 @@
 
             <Button
                 android:id="@+id/addButton"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Widget.Atelier.Button.Tonal"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"

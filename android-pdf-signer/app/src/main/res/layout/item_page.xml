@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Widget.Material3.CardView.Elevated"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    app:cardCornerRadius="14dp">
+    android:layout_margin="5dp"
+    app:cardCornerRadius="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,9 +13,9 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="?attr/colorSurfaceContainerHighest"
-            android:padding="6dp">
+            android:layout_height="156dp"
+            android:background="@color/surface_sunk"
+            android:padding="8dp">
 
             <ImageView
                 android:id="@+id/pageThumb"
@@ -31,15 +30,28 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|start"
                 android:background="@drawable/bg_badge"
-                android:minWidth="24dp"
+                android:minWidth="22dp"
                 android:gravity="center"
-                android:paddingHorizontal="7dp"
-                android:paddingVertical="2dp"
-                android:textAppearance="?attr/textAppearanceLabelMedium"
-                android:textColor="#FFFFFF" />
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="1dp"
+                android:textAppearance="@style/TextAppearance.Atelier.Meta"
+                android:textColor="@color/on_ink" />
+
+            <ImageView
+                android:id="@+id/pageCheck"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_selected_badge"
+                android:importantForAccessibility="no"
+                android:padding="4dp"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                app:tint="@color/on_accent" />
         </FrameLayout>
 
         <LinearLayout
+            android:id="@+id/pageActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -52,7 +64,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/rotate"
                 android:src="@drawable/ic_rotate"
-                app:tint="?attr/colorOnSurfaceVariant" />
+                app:tint="@color/ink_soft" />
 
             <ImageButton
                 android:id="@+id/pageDelete"
@@ -62,7 +74,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/action_delete"
                 android:src="@drawable/ic_delete"
-                app:tint="?attr/colorOnSurfaceVariant" />
+                app:tint="@color/ink_soft" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

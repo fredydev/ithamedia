@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -7,27 +8,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="12dp">
+        android:paddingBottom="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="20dp"
-            android:paddingVertical="12dp">
+            android:paddingHorizontal="24dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="12dp">
 
             <ImageView
                 android:id="@+id/sheetIcon"
                 android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:importantForAccessibility="no"
-                android:padding="10dp" />
+                android:layout_height="56dp"
+                android:importantForAccessibility="no" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
+                android:layout_marginStart="16dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
@@ -37,21 +38,53 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="middle"
                     android:singleLine="true"
-                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+                    android:textAppearance="@style/TextAppearance.Atelier.Title"
+                    android:textSize="22sp" />
 
                 <TextView
                     android:id="@+id/sheetMeta"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:textAppearance="@style/TextAppearance.Atelier.Meta" />
             </LinearLayout>
         </LinearLayout>
 
-        <com.google.android.material.divider.MaterialDivider
+        <LinearLayout
+            android:id="@+id/quickRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp" />
+            android:orientation="horizontal"
+            android:paddingHorizontal="20dp">
+
+            <Button
+                android:id="@+id/quickOpen"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                android:text="@string/action_open"
+                app:icon="@drawable/ic_eye" />
+
+            <Button
+                android:id="@+id/quickShare"
+                style="@style/Widget.Atelier.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                android:text="@string/share"
+                app:icon="@drawable/ic_share" />
+
+            <Button
+                android:id="@+id/quickExport"
+                style="@style/Widget.Atelier.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                android:text="@string/action_export_short"
+                app:icon="@drawable/ic_download" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/sheetActions"

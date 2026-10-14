@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
@@ -21,6 +23,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -29,6 +32,7 @@ class SignActivity : BaseToolActivity() {
 
     private companion object {
         const val KEY_PLACE = "last_place"
+        const val KEY_BLUE = "ink_blue"
     }
 
     private lateinit var pageView: PdfPageView
@@ -43,21 +47,45 @@ class SignActivity : BaseToolActivity() {
     private var pageWidthPts = 0
     private val placementsByPage = HashMap<Int, MutableList<Placement>>()
 
+    private lateinit var tool: Tool
+    private var startActionDone = false
     private val savedSignatureFile by lazy { File(filesDir, "signature.png") }
+    private val savedInitialsFile by lazy { File(filesDir, "initials.png") }
+
+    private val pickImage = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri == null) return@registerForActivityResult
+        runTask(getString(R.string.loading), {
+            val copy = Library.cacheCopy(this, uri)
+            ImageUtils.decode(copy, 1600).also { copy.delete() }
+        }) { bmp ->
+            if (bmp == null) toast(R.string.image_unreadable) else placeSignature(bmp, 0.3f)
+        }
+    }
     private val prefs by lazy { getSharedPreferences("prefs", MODE_PRIVATE) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupScreen(R.layout.activity_sign, R.string.tool_sign)
+        tool = Tool.from(intent, Tool.SIGN)
+        setupScreen(R.layout.activity_sign, tool.title)
 
         pageView = findViewById(R.id.pageView)
         pageIndicator = findViewById(R.id.pageIndicator)
         prevPage = findViewById(R.id.prevPage)
         nextPage = findViewById(R.id.nextPage)
 
-        findViewById<Button>(R.id.signButton).setOnClickListener { chooseSignature() }
-        findViewById<Button>(R.id.textButton).setOnClickListener { addText() }
+        findViewById<View>(R.id.toolSignature).setOnClickListener { chooseSignature(initials = false) }
+        findViewById<View>(R.id.toolInitials).setOnClickListener { chooseSignature(initials = true) }
+        findViewById<View>(R.id.toolText).setOnClickListener { addText() }
+        findViewById<View>(R.id.toolDate).setOnClickListener { placeText(today()) }
+        findViewById<View>(R.id.toolCheck).setOnClickListener { placeGlyph(Glyphs.Kind.CHECK) }
+        findViewById<View>(R.id.toolCross).setOnClickListener { placeGlyph(Glyphs.Kind.CROSS) }
+        findViewById<View>(R.id.toolDot).setOnClickListener { placeGlyph(Glyphs.Kind.DOT) }
+        findViewById<View>(R.id.toolLine).setOnClickListener { placeGlyph(Glyphs.Kind.LINE) }
+        findViewById<View>(R.id.toolStamp).setOnClickListener { showStamps() }
+        findViewById<View>(R.id.toolImage).setOnClickListener { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
         findViewById<Button>(R.id.saveButton).setOnClickListener { save() }
+        findViewById<View>(R.id.inkToggle).setOnClickListener { toggleInk() }
+        updateInkSwatch()
         prevPage.setOnClickListener { showPage(currentPage - 1) }
         nextPage.setOnClickListener { showPage(currentPage + 1) }
         pageView.onPlacementRemoved = { toast(R.string.signature_removed) }
@@ -85,6 +113,14 @@ class SignActivity : BaseToolActivity() {
             placementsByPage.clear()
             toolbar.subtitle = file.name
             showPage(0)
+            if (!startActionDone) {
+                startActionDone = true
+                when (tool) {
+                    Tool.STAMP -> showStamps()
+                    Tool.ADD_IMAGE -> pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    else -> Unit
+                }
+            }
         } catch (e: Exception) {
             showError(UserMessageException(getString(R.string.error_open, e.localizedMessage ?: e.javaClass.simpleName)))
         }
@@ -125,36 +161,42 @@ class SignActivity : BaseToolActivity() {
 
     // --- Signature ---------------------------------------------------------------------------
 
-    private fun chooseSignature() {
-        val saved = loadSavedSignature()
+    private fun chooseSignature(initials: Boolean) {
+        val saved = loadSaved(initials)
         if (saved == null) {
-            drawSignature()
+            drawSignature(initials)
             return
         }
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.choose_signature)
+            .setTitle(if (initials) R.string.initials else R.string.choose_signature)
             .setItems(
-                arrayOf(getString(R.string.use_saved_signature), getString(R.string.draw_new_signature)),
+                arrayOf(
+                    getString(if (initials) R.string.use_saved_initials else R.string.use_saved_signature),
+                    getString(if (initials) R.string.draw_new_initials else R.string.draw_new_signature),
+                ),
             ) { _, which ->
-                if (which == 0) placeSignature(saved) else drawSignature()
+                if (which == 0) placeSignature(saved, if (initials) 0.12f else 0.35f) else drawSignature(initials)
             }
             .show()
     }
 
-    private fun drawSignature() {
+    private fun drawSignature(initials: Boolean) {
         val content = LayoutInflater.from(this).inflate(R.layout.dialog_signature, null)
         val pad = content.findViewById<SignaturePadView>(R.id.signaturePad)
         val remember = content.findViewById<MaterialCheckBox>(R.id.rememberSignature)
-        content.findViewById<MaterialButtonToggleGroup>(R.id.colorGroup)
-            .addOnButtonCheckedListener { _, checkedId, isChecked ->
-                if (!isChecked) return@addOnButtonCheckedListener
-                val color = if (checkedId == R.id.colorBlue) R.color.ink_blue else R.color.ink_black
-                pad.inkColor = ContextCompat.getColor(this, color)
-            }
-        pad.inkColor = ContextCompat.getColor(this, R.color.ink_black)
+        val group = content.findViewById<MaterialButtonToggleGroup>(R.id.colorGroup)
+        group.check(if (inkColor() == ContextCompat.getColor(this, R.color.ink_blue)) R.id.colorBlue else R.id.colorBlack)
+        group.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val blue = checkedId == R.id.colorBlue
+            prefs.edit().putBoolean(KEY_BLUE, blue).apply()
+            pad.inkColor = inkColor()
+            updateInkSwatch()
+        }
+        pad.inkColor = inkColor()
 
         val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.draw_signature)
+            .setTitle(if (initials) R.string.draw_initials else R.string.draw_signature)
             .setView(content)
             .setPositiveButton(R.string.validate, null)
             .setNegativeButton(R.string.cancel, null)
@@ -170,29 +212,108 @@ class SignActivity : BaseToolActivity() {
                     toast(getString(R.string.signature_empty))
                     return@setOnClickListener
                 }
-                if (remember.isChecked) saveSignature(bitmap)
+                if (remember.isChecked) save(bitmap, if (initials) savedInitialsFile else savedSignatureFile)
                 dialog.dismiss()
-                placeSignature(bitmap)
+                placeSignature(bitmap, if (initials) 0.12f else 0.35f)
             }
         }
         dialog.show()
     }
 
-    private fun placeSignature(signature: Bitmap) {
-        pageView.addPlacement(signature)
+    private fun placeSignature(signature: Bitmap, widthFraction: Float = 0.35f) {
+        pageView.addPlacement(signature, widthFraction)
         toast(getString(R.string.hint_place))
     }
 
-    private fun loadSavedSignature(): Bitmap? =
-        if (savedSignatureFile.exists()) BitmapFactory.decodeFile(savedSignatureFile.absolutePath) else null
+    private fun loadSaved(initials: Boolean): Bitmap? {
+        val file = if (initials) savedInitialsFile else savedSignatureFile
+        return if (file.exists()) BitmapFactory.decodeFile(file.absolutePath) else null
+    }
 
-    private fun saveSignature(bitmap: Bitmap) {
+    private fun save(bitmap: Bitmap, file: File) {
         try {
-            FileOutputStream(savedSignatureFile).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         } catch (_: Exception) {
             // La mémorisation est facultative
         }
     }
+
+    // --- Encre, signes, tampons --------------------------------------------------------------
+
+    private fun inkColor(): Int =
+        ContextCompat.getColor(this, if (prefs.getBoolean(KEY_BLUE, false)) R.color.ink_blue else R.color.ink_black)
+
+    private fun toggleInk() {
+        prefs.edit().putBoolean(KEY_BLUE, !prefs.getBoolean(KEY_BLUE, false)).apply()
+        updateInkSwatch()
+        toast(if (prefs.getBoolean(KEY_BLUE, false)) R.string.ink_blue_on else R.string.ink_black_on)
+    }
+
+    private fun updateInkSwatch() {
+        findViewById<View>(R.id.inkSwatch)?.background?.mutate()?.setTint(inkColor())
+    }
+
+    /** Taille d'affichage ≈ [points] sur la page. */
+    private fun fraction(bitmapWidth: Int, points: Float, pxPerPoint: Float) =
+        if (pageWidthPts > 0) bitmapWidth / pxPerPoint * points / pageWidthPts else 0.2f
+
+    private fun placeGlyph(kind: Glyphs.Kind) {
+        val bmp = Glyphs.render(kind, inkColor())
+        val pts = if (kind == Glyphs.Kind.LINE) 90f else 14f
+        pageView.addPlacement(bmp, if (pageWidthPts > 0) pts / pageWidthPts else 0.04f)
+    }
+
+    private fun placeText(text: String) {
+        val bitmap = TextStamp.render(text, inkColor())
+        pageView.addPlacement(bitmap, fraction(bitmap.width, 12f, 72f))
+    }
+
+    private fun showStamps() {
+        val sheet = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+        val view = LayoutInflater.from(this).inflate(R.layout.sheet_stamps, null)
+        val grid = view.findViewById<android.widget.GridLayout>(R.id.stampGrid)
+        val withDate = view.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.stampDate)
+        val dp = resources.displayMetrics.density
+        fun fill() {
+            grid.removeAllViews()
+            StampRenderer.presets.forEach { preset ->
+                val bmp = StampRenderer.render(preset.label, ContextCompat.getColor(this, preset.colorRes), withDate.isChecked)
+                val image = android.widget.ImageView(this).apply {
+                    setImageBitmap(bmp)
+                    scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                    setPadding((10 * dp).toInt(), (10 * dp).toInt(), (10 * dp).toInt(), (10 * dp).toInt())
+                    setBackgroundResource(R.drawable.bg_hairline_box)
+                    contentDescription = preset.label
+                    setOnClickListener {
+                        sheet.dismiss()
+                        pageView.addPlacement(bmp, if (pageWidthPts > 0) 150f / pageWidthPts else 0.3f)
+                        toast(getString(R.string.hint_place))
+                    }
+                }
+                grid.addView(image, android.widget.GridLayout.LayoutParams(
+                    android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED),
+                    android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f),
+                ).apply {
+                    width = 0
+                    height = (64 * dp).toInt()
+                    setMargins((4 * dp).toInt(), (4 * dp).toInt(), (4 * dp).toInt(), (4 * dp).toInt())
+                })
+            }
+        }
+        withDate.setOnCheckedChangeListener { _, _ -> fill() }
+        fill()
+        view.findViewById<View>(R.id.stampCustom).setOnClickListener {
+            sheet.dismiss()
+            promptText(this, R.string.custom_stamp, R.string.text_hint, "") { label ->
+                val bmp = StampRenderer.render(label.uppercase(Locale.FRANCE), ContextCompat.getColor(this, R.color.stamp_red), withDate.isChecked)
+                pageView.addPlacement(bmp, if (pageWidthPts > 0) 150f / pageWidthPts else 0.3f)
+            }
+        }
+        sheet.setContentView(view)
+        sheet.show()
+    }
+
+    private fun today(): String = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
     // --- Texte (date, lieu…) ------------------------------------------------------------------
 

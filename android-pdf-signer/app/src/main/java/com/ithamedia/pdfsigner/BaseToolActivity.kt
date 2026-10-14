@@ -53,21 +53,26 @@ abstract class BaseToolActivity : AppCompatActivity() {
                 hasInput = true
                 onInputPdf(file)
             }
-            savedInstanceState == null -> pickPdf.launch(arrayOf("application/pdf"))
+            savedInstanceState == null -> pickPdf.launch(inputTypes)
             else -> finish()
         }
     }
 
-    protected fun pickAnotherPdf() = pickPdf.launch(arrayOf("application/pdf"))
+    protected fun pickAnotherPdf() = pickPdf.launch(inputTypes)
+
+    /** Types de fichiers acceptés par le sélecteur d'entrée. */
+    protected open val inputTypes: Array<String> = arrayOf("application/pdf")
 
     /** Appelé avec le PDF à traiter (voir [startWithPdfInput]). */
     protected open fun onInputPdf(file: File) {}
 
-    protected fun setupScreen(@LayoutRes layout: Int, @StringRes title: Int) {
+    protected fun setupScreen(@LayoutRes layout: Int, @StringRes title: Int) = setupScreen(layout, getString(title))
+
+    protected fun setupScreen(@LayoutRes layout: Int, title: String) {
         setContentView(layout)
         PDFBoxResourceLoader.init(applicationContext)
         toolbar = findViewById(R.id.toolbar)
-        toolbar.setTitle(title)
+        toolbar.title = title
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
         busyOverlay = findViewById(R.id.busyOverlay)
         busyText = findViewById(R.id.busyText)
@@ -111,6 +116,18 @@ abstract class BaseToolActivity : AppCompatActivity() {
     /** Affiche le fichier produit avec les actions Ouvrir / Partager / Enregistrer. */
     protected fun showResult(file: File, summary: String? = null) {
         ResultSheet.show(this, file, summary, exporter) { finish() }
+    }
+
+    protected fun deliver(output: ToolOutput) {
+        when (output) {
+            is ToolOutput.Single -> showResult(output.file, output.summary)
+            is ToolOutput.Many -> ResultSheet.showMany(this, output.folder, output.files, output.summary) { finish() }
+            is ToolOutput.Info -> MaterialAlertDialogBuilder(this)
+                .setTitle(output.title)
+                .setMessage(output.message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
     }
 
     protected fun toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

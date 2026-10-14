@@ -3,53 +3,69 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingHorizontal="24dp"
-    android:paddingTop="16dp"
+    android:paddingTop="24dp"
     android:paddingBottom="20dp">
 
-    <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@drawable/bg_circle"
-        android:backgroundTint="?attr/colorPrimaryContainer"
-        android:importantForAccessibility="no"
-        android:padding="16dp"
-        android:src="@drawable/ic_check"
-        app:tint="?attr/colorOnPrimaryContainer" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/result_kicker"
+        android:textAppearance="@style/TextAppearance.Atelier.Label"
+        android:textColor="@color/accent" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="4dp"
         android:text="@string/result_title"
-        android:textAppearance="?attr/textAppearanceTitleLarge"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Atelier.Headline" />
 
-    <TextView
-        android:id="@+id/resultName"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:ellipsize="middle"
-        android:singleLine="true"
-        android:textAppearance="?attr/textAppearanceBodyLarge" />
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_hairline_box"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
 
-    <TextView
-        android:id="@+id/resultSummary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurfaceVariant" />
+        <ImageView
+            android:id="@+id/resultThumb"
+            android:layout_width="44dp"
+            android:layout_height="56dp"
+            android:importantForAccessibility="no" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/resultName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.Atelier.RowTitle" />
+
+            <TextView
+                android:id="@+id/resultSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.Atelier.Meta" />
+        </LinearLayout>
+    </LinearLayout>
 
     <Button
         android:id="@+id/resultOpen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:text="@string/action_open"
         app:icon="@drawable/ic_eye" />
 
@@ -60,20 +76,20 @@
 
         <Button
             android:id="@+id/resultShare"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.Atelier.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
+            android:layout_marginEnd="4dp"
             android:layout_weight="1"
             android:text="@string/share"
             app:icon="@drawable/ic_share" />
 
         <Button
             android:id="@+id/resultExport"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.Atelier.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
+            android:layout_marginStart="4dp"
             android:layout_weight="1"
             android:text="@string/action_export_short"
             app:icon="@drawable/ic_download" />
@@ -82,22 +98,26 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/resultMore"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+            style="@style/Widget.Atelier.Button.Link"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/more_actions" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <Button
             android:id="@+id/resultDone"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+            style="@style/Widget.Atelier.Button.Link"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/done" />
     </LinearLayout>
 </LinearLayout>

@@ -55,6 +55,20 @@ object DocxConverter {
         }
     }
 
+    /** Texte brut → PDF paginé, avec la même mise en page que la conversion Word. */
+    fun textToPdf(text: String, output: File, fontSize: Float, serif: Boolean) {
+        val blocks = text.replace("\r\n", "\n").split('\n').map { line ->
+            Block.Paragraph(ParaProps(), if (line.isEmpty()) emptyList() else listOf(Inline.Text(line, RunProps(), null)))
+        }
+        val document = Document(
+            blocks, PageSetup(), emptyMap(),
+            ParaProps(spaceAfter = fontSize * 0.35f, lineMultiplier = 1.2f),
+            RunProps(size = fontSize, family = if (serif) "serif" else null),
+            null, emptyMap(),
+        )
+        Renderer(document).render(output)
+    }
+
     // --- Modèle ------------------------------------------------------------------------------
 
     class RunProps(

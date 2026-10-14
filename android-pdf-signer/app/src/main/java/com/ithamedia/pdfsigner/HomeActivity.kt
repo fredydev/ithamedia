@@ -19,8 +19,8 @@ class HomeActivity : AppCompatActivity() {
     val exporter = Exporter(this)
     private lateinit var bottomNav: BottomNavigationView
 
-    private val toolsFragment get() = supportFragmentManager.findFragmentByTag(TAG_TOOLS) as ToolsFragment
-    private val filesFragment get() = supportFragmentManager.findFragmentByTag(TAG_FILES) as FilesFragment
+    private val toolsFragment get() = supportFragmentManager.findFragmentByTag(Tags.TOOLS) as ToolsFragment
+    private val filesFragment get() = supportFragmentManager.findFragmentByTag(Tags.FILES) as FilesFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +30,8 @@ class HomeActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             val files = FilesFragment()
             supportFragmentManager.beginTransaction()
-                .add(R.id.homeContainer, ToolsFragment(), TAG_TOOLS)
-                .add(R.id.homeContainer, files, TAG_FILES)
+                .add(R.id.homeContainer, ToolsFragment(), Tags.TOOLS)
+                .add(R.id.homeContainer, files, Tags.FILES)
                 .hide(files)
                 .commitNow()
         }
@@ -44,6 +44,10 @@ class HomeActivity : AppCompatActivity() {
             true
         }
         if (savedInstanceState == null) handleIncomingIntent(intent)
+    }
+
+    companion object {
+        const val EXTRA_FOLDER = "folder"
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -62,6 +66,11 @@ class HomeActivity : AppCompatActivity() {
 
     /** PDF reçu via « Ouvrir avec… » ou « Partager » : importé puis proposé avec ses actions. */
     private fun handleIncomingIntent(intent: Intent?) {
+        intent?.getStringExtra(EXTRA_FOLDER)?.let { path ->
+            showFiles()
+            filesFragment.openFolder(java.io.File(path))
+            return
+        }
         val uri: Uri = when (intent?.action) {
             Intent.ACTION_VIEW -> intent.data
             Intent.ACTION_SEND ->
@@ -87,9 +96,9 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private companion object {
-        const val TAG_TOOLS = "tools"
-        const val TAG_FILES = "files"
+    private object Tags {
+        const val TOOLS = "tools"
+        const val FILES = "files"
     }
 }
 

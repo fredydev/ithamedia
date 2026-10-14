@@ -45,3 +45,9 @@ Le workflow GitHub Actions `.github/workflows/android-pdf-signer.yml` compile l'
 et le publie comme artefact (`pdf-signer-debug-apk`).
 
 Android 8.0 (API 26) minimum.
+
+## Crédits
+
+- Icônes : [Lucide](https://lucide.dev) (licence ISC), converties en VectorDrawable.
+- Polices : [Instrument Serif](https://github.com/Instrument/instrument-serif) et
+  [IBM Plex Mono](https://github.com/IBM/plex), licence SIL Open Font License 1.1.

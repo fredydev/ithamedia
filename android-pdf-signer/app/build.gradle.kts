@@ -11,8 +11,8 @@ android {
         applicationId = "com.ithamedia.pdfsigner"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "2.0"
+        versionCode = 3
+        versionName = "3.0"
     }
 
     buildTypes {
@@ -45,4 +45,6 @@ dependencies {
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     // Scanner de documents (détection des bords, recadrage, filtres) via Google Play Services
     implementation("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1")
+    // Reconnaissance de texte (OCR) sur l'appareil, alphabet latin
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }

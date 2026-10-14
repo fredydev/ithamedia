@@ -25,6 +25,7 @@ class FilesFragment : Fragment(), Refreshable {
 
     private lateinit var currentDir: File
     private lateinit var pathText: TextView
+    private lateinit var countText: TextView
     private lateinit var emptyView: View
     private val adapter = FileAdapter(
         onClick = { file -> if (file.isDirectory) navigate(file) else FileActions.open(requireContext(), file) },
@@ -61,6 +62,7 @@ class FilesFragment : Fragment(), Refreshable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         currentDir = Library.root(requireContext())
         pathText = view.findViewById(R.id.pathText)
+        countText = view.findViewById(R.id.countText)
         emptyView = view.findViewById(R.id.filesEmpty)
         view.findViewById<RecyclerView>(R.id.fileList).apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -81,6 +83,10 @@ class FilesFragment : Fragment(), Refreshable {
         updateBackCallback()
     }
 
+    fun openFolder(dir: File) {
+        if (::currentDir.isInitialized && dir.isDirectory && Library.isInLibrary(requireContext(), dir)) navigate(dir)
+    }
+
     fun openRoot() {
         if (::currentDir.isInitialized) navigate(Library.root(requireContext()))
     }
@@ -96,7 +102,8 @@ class FilesFragment : Fragment(), Refreshable {
         val items = Library.list(currentDir)
         adapter.submit(items)
         emptyView.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
-        pathText.text = FileActionsSheet.folderLabel(requireActivity() as HomeActivity, Library.root(requireContext()), currentDir)
+        pathText.text = FileActionsSheet.folderLabel(requireContext(), Library.root(requireContext()), currentDir).uppercase(java.util.Locale.FRANCE)
+        countText.text = resources.getQuantityString(R.plurals.items_count, items.size, items.size)
         updateBackCallback()
     }
 

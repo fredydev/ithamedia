@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stamps"
+            android:textAppearance="@style/TextAppearance.Atelier.Title" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/stampDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:checked="true"
+            android:text="@string/stamp_with_date" />
+
+        <GridLayout
+            android:id="@+id/stampGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="-4dp"
+            android:columnCount="2" />
+
+        <Button
+            android:id="@+id/stampCustom"
+            style="@style/Widget.Atelier.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/custom_stamp" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

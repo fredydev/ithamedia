@@ -1,5 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lucide (ISC) : image -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
     android:tint="?attr/colorControlNormal">
-    <path android:fillColor="@android:color/white" android:pathData="M21,19V5c0,-1.1 -0.9,-2 -2,-2H5c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2zM8.5,13.5l2.5,3.01L14.5,12l4.5,6H5l3.5,-4.5z" />
+    <path
+        android:pathData="M5,3h14a2,2 0 0,1 2,2v14a2,2 0 0,1 -2,2h-14a2,2 0 0,1 -2,-2v-14a2,2 0 0,1 2,-2z"
+        android:strokeWidth="1.75"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M7,9a2,2 0 1,0 4,0a2,2 0 1,0 -4,0"
+        android:strokeWidth="1.75"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"
+        android:strokeWidth="1.75"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
 </vector>

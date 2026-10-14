@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/paper"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pageGrid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="7dp" />
+
+        <include layout="@layout/busy_overlay" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bar"
+        android:orientation="vertical"
+        android:paddingHorizontal="13dp"
+        android:paddingVertical="12dp">
+
+        <LinearLayout
+            android:id="@+id/selectionBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="3dp">
+
+                <TextView
+                    android:id="@+id/selectionCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAppearance="@style/TextAppearance.Atelier.Label"
+                    android:textColor="@color/accent" />
+
+                <Button
+                    android:id="@+id/clearSelection"
+                    style="@style/Widget.Atelier.Button.Link"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/clear_selection" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/actionRotate"
+                    style="@style/Widget.Atelier.Button.Tonal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="3dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="@string/rotate"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_rotate"
+                    app:iconGravity="top"
+                    app:iconPadding="2dp" />
+                <Button
+                    android:id="@+id/actionDuplicate"
+                    style="@style/Widget.Atelier.Button.Tonal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="3dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="@string/duplicate"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_duplicate"
+                    app:iconGravity="top"
+                    app:iconPadding="2dp" />
+                <Button
+                    android:id="@+id/actionExtract"
+                    style="@style/Widget.Atelier.Button.Tonal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="3dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="@string/extract"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_extract"
+                    app:iconGravity="top"
+                    app:iconPadding="2dp" />
+                <Button
+                    android:id="@+id/actionDelete"
+                    style="@style/Widget.Atelier.Button.Tonal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="3dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="4dp"
+                    android:text="@string/action_delete"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_delete"
+                    app:iconGravity="top"
+                    app:iconPadding="2dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/idleBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/organizeHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="3dp"
+                android:textAppearance="@style/TextAppearance.Atelier.Body"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/insertRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/insertBlank"
+                    style="@style/Widget.Atelier.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="3dp"
+                    android:layout_weight="1"
+                    android:text="@string/insert_blank"
+                    app:icon="@drawable/ic_blank" />
+
+                <Button
+                    android:id="@+id/insertPdf"
+                    style="@style/Widget.Atelier.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="3dp"
+                    android:layout_weight="1"
+                    android:text="@string/insert_pdf"
+                    app:icon="@drawable/ic_insert" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/primaryButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="3dp"
+                android:layout_marginTop="6dp"
+                app:icon="@drawable/ic_check" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

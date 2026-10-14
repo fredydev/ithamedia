@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/paper"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/page_background">
+
+        <com.ithamedia.pdfsigner.AnnotationView
+            android:id="@+id/annotationView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <include layout="@layout/busy_overlay" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp">
+
+        <Button
+            android:id="@+id/prevPage"
+            style="@style/Widget.Atelier.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/previous_page"
+            app:icon="@drawable/ic_chevron_left" />
+
+        <TextView
+            android:id="@+id/pageIndicator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Atelier.Meta" />
+
+        <Button
+            android:id="@+id/nextPage"
+            style="@style/Widget.Atelier.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/next_page"
+            app:icon="@drawable/ic_chevron_right" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="12dp">
+
+                <Button
+                    android:id="@+id/keyRedact"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/redact_zone"
+                    app:icon="@drawable/ic_redact" />
+                <Button
+                    android:id="@+id/keyEraser"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/eraser"
+                    app:icon="@drawable/ic_eraser" />
+
+        <Button
+            android:id="@+id/searchButton"
+            style="@style/Widget.Atelier.ToolKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search"
+            app:icon="@drawable/ic_file_search" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/saveButton"
+            style="@style/Widget.Atelier.Button.Accent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/redact_action" />
+    </LinearLayout>
+</LinearLayout>

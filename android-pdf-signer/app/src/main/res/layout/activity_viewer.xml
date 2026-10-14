@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@color/paper"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <include layout="@layout/toolbar" />
 
     <FrameLayout
+        android:id="@+id/viewerRoot"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -19,7 +21,35 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:padding="8dp" />
+            android:paddingHorizontal="10dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="96dp" />
+
+        <TextView
+            android:id="@+id/pageChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="18dp"
+            android:background="@drawable/bg_badge"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:textAppearance="@style/TextAppearance.Atelier.Meta"
+            android:textColor="@color/on_ink" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/toolsFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:text="@string/tools"
+            android:textAppearance="@style/TextAppearance.Atelier.Button"
+            android:textColor="@color/on_ink"
+            app:backgroundTint="@color/ink"
+            app:icon="@drawable/ic_apps"
+            app:iconTint="@color/on_ink"
+            app:shapeAppearance="@style/Shape.Atelier.Medium" />
 
         <include layout="@layout/busy_overlay" />
     </FrameLayout>

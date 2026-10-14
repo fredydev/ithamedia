@@ -24,24 +24,10 @@ object PdfSigner {
             for ((pageIndex, placements) in placementsByPage) {
                 if (placements.isEmpty() || pageIndex >= doc.numberOfPages) continue
                 val page = doc.getPage(pageIndex)
-                val box = page.cropBox
-                val rotation = ((page.rotation % 360) + 360) % 360
-                val rotated = rotation == 90 || rotation == 270
-                val dispW = if (rotated) box.height else box.width
-                val dispH = if (rotated) box.width else box.height
-
-                // Convertit un point de la page affichée (origine en haut à gauche, en points)
-                // vers l'espace utilisateur PDF, en tenant compte de /Rotate.
-                fun toPdf(dx: Float, dy: Float): FloatArray {
-                    val llx = box.lowerLeftX
-                    val lly = box.lowerLeftY
-                    return when (rotation) {
-                        90 -> floatArrayOf(llx + dy, lly + dx)
-                        180 -> floatArrayOf(llx + box.width - dx, lly + dy)
-                        270 -> floatArrayOf(llx + box.width - dy, lly + box.height - dx)
-                        else -> floatArrayOf(llx + dx, lly + box.height - dy)
-                    }
-                }
+                val mapper = PageMapper(page)
+                val dispW = mapper.width
+                val dispH = mapper.height
+                fun toPdf(dx: Float, dy: Float) = mapper.toPdf(dx, dy)
 
                 PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true, true).use { cs ->
                     for (p in placements) {

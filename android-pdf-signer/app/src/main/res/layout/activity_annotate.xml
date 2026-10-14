@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/paper"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/page_background">
+
+        <com.ithamedia.pdfsigner.AnnotationView
+            android:id="@+id/annotationView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <include layout="@layout/busy_overlay" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp">
+
+        <Button
+            android:id="@+id/prevPage"
+            style="@style/Widget.Atelier.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/previous_page"
+            app:icon="@drawable/ic_chevron_left" />
+
+        <TextView
+            android:id="@+id/pageIndicator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Atelier.Meta" />
+
+        <Button
+            android:id="@+id/nextPage"
+            style="@style/Widget.Atelier.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/next_page"
+            app:icon="@drawable/ic_chevron_right" />
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
+
+                <Button
+                    android:id="@+id/keyPen"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pen"
+                    app:icon="@drawable/ic_pen" />
+                <Button
+                    android:id="@+id/keyHighlighter"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/highlighter"
+                    app:icon="@drawable/ic_highlighter" />
+                <Button
+                    android:id="@+id/keyRect"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rectangle"
+                    app:icon="@drawable/ic_square" />
+                <Button
+                    android:id="@+id/keyOval"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/oval"
+                    app:icon="@drawable/ic_circle" />
+                <Button
+                    android:id="@+id/keyLine"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/line_mark"
+                    app:icon="@drawable/ic_minus" />
+                <Button
+                    android:id="@+id/keyArrow"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/arrow"
+                    app:icon="@drawable/ic_arrow" />
+                <Button
+                    android:id="@+id/keyText"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_text"
+                    app:icon="@drawable/ic_text" />
+                <Button
+                    android:id="@+id/keyNote"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/note"
+                    app:icon="@drawable/ic_note" />
+                <Button
+                    android:id="@+id/keyEraser"
+                    style="@style/Widget.Atelier.ToolKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/eraser"
+                    app:icon="@drawable/ic_eraser" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:id="@+id/swatches"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+
+        <Button
+            android:id="@+id/widthButton"
+            style="@style/Widget.Atelier.Button.Link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/save_pdf" />
+    </LinearLayout>
+</LinearLayout>

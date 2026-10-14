@@ -1,5 +1,7 @@
 package com.ithamedia.pdfsigner
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -16,7 +18,44 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.io.File
 
-/** Feuille affichée quand un outil a produit un fichier. */
+/** Construction des listes d'actions des feuilles du bas. */
+private class ActionList(private val activity: AppCompatActivity, private val container: LinearLayout, private val dialog: BottomSheetDialog) {
+    private val inflater = LayoutInflater.from(activity)
+
+    fun header(title: String) {
+        val v = inflater.inflate(R.layout.item_section_header, container, false)
+        v.findViewById<TextView>(R.id.sectionTitle).text = title
+        container.addView(v)
+    }
+
+    fun add(@DrawableRes icon: Int, label: String, sub: String? = null, destructive: Boolean = false, action: () -> Unit) {
+        val row = inflater.inflate(R.layout.item_action, container, false)
+        val iconView = row.findViewById<ImageView>(R.id.actionIcon)
+        val labelView = row.findViewById<TextView>(R.id.actionLabel)
+        val subView = row.findViewById<TextView>(R.id.actionSub)
+        iconView.setImageResource(icon)
+        labelView.text = label
+        if (sub != null) {
+            subView.text = sub
+            subView.visibility = View.VISIBLE
+        }
+        if (destructive) {
+            val red = ContextCompat.getColor(activity, R.color.danger)
+            iconView.setColorFilter(red)
+            labelView.setTextColor(red)
+        }
+        row.setOnClickListener {
+            dialog.dismiss()
+            action()
+        }
+        container.addView(row)
+    }
+
+    fun add(@DrawableRes icon: Int, @StringRes label: Int, destructive: Boolean = false, action: () -> Unit) =
+        add(icon, activity.getString(label), null, destructive, action)
+}
+
+/** Feuille affichée quand un outil a produit un ou plusieurs fichiers. */
 object ResultSheet {
 
     fun show(activity: AppCompatActivity, file: File, summary: String?, exporter: Exporter, onDone: () -> Unit) {
@@ -25,6 +64,7 @@ object ResultSheet {
         view.findViewById<TextView>(R.id.resultName).text = file.name
         view.findViewById<TextView>(R.id.resultSummary).text =
             summary ?: activity.getString(R.string.result_saved_in_library, formatSize(file.length()))
+        FileRow.bindIcon(view.findViewById(R.id.resultThumb), file)
         view.findViewById<View>(R.id.resultOpen).setOnClickListener { FileActions.open(activity, file) }
         view.findViewById<View>(R.id.resultShare).setOnClickListener { FileActions.share(activity, listOf(file)) }
         view.findViewById<View>(R.id.resultExport).setOnClickListener { exporter.export(file) }
@@ -38,6 +78,63 @@ object ResultSheet {
         dialog.setContentView(view)
         dialog.show()
     }
+
+    fun showMany(activity: AppCompatActivity, folder: File, files: List<File>, summary: String?, onDone: () -> Unit) {
+        val dialog = BottomSheetDialog(activity)
+        val view = LayoutInflater.from(activity).inflate(R.layout.sheet_result, null)
+        view.findViewById<TextView>(R.id.resultName).text = folder.name
+        view.findViewById<TextView>(R.id.resultSummary).text =
+            (summary ?: activity.resources.getQuantityString(R.plurals.files_count, files.size, files.size)) + " · " +
+                activity.getString(R.string.folder_in_library)
+        FileRow.bindIcon(view.findViewById(R.id.resultThumb), folder)
+        view.findViewById<TextView>(R.id.resultOpen).setText(R.string.open_folder)
+        view.findViewById<View>(R.id.resultOpen).setOnClickListener {
+            dialog.dismiss()
+            activity.startActivity(
+                Intent(activity, HomeActivity::class.java)
+                    .putExtra(HomeActivity.EXTRA_FOLDER, folder.absolutePath)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            )
+            activity.finish()
+        }
+        view.findViewById<View>(R.id.resultShare).setOnClickListener { FileActions.share(activity, files) }
+        view.findViewById<View>(R.id.resultExport).visibility = View.GONE
+        view.findViewById<View>(R.id.resultMore).visibility = View.GONE
+        view.findViewById<View>(R.id.resultDone).setOnClickListener {
+            dialog.dismiss()
+            onDone()
+        }
+        dialog.setContentView(view)
+        dialog.show()
+    }
+}
+
+/** Tous les outils applicables à un PDF, groupés par rubrique. */
+object ToolsSheet {
+    fun show(activity: AppCompatActivity, file: File) {
+        val dialog = BottomSheetDialog(activity)
+        val view = LayoutInflater.from(activity).inflate(R.layout.sheet_file_actions, null)
+        FileRow.bindIcon(view.findViewById(R.id.sheetIcon), file)
+        view.findViewById<TextView>(R.id.sheetTitle).text = file.name
+        view.findViewById<TextView>(R.id.sheetMeta).setText(R.string.all_tools)
+        view.findViewById<View>(R.id.quickRow).visibility = View.GONE
+        val list = ActionList(activity, view.findViewById(R.id.sheetActions), dialog)
+        addTools(list, activity, file)
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    fun addTools(list: Any, activity: AppCompatActivity, file: File) {
+        val actions = list as ActionList
+        Category.entries.forEach { category ->
+            val tools = Tool.entries.filter { it.category == category && it.onPdf }
+            if (tools.isEmpty()) return@forEach
+            actions.header("${category.number} — ${category.title}")
+            tools.forEach { tool ->
+                actions.add(tool.icon, tool.title, tool.subtitle) { FileActions.launchTool(activity, tool, listOf(file)) }
+            }
+        }
+    }
 }
 
 /** Toutes les actions possibles sur un fichier ou dossier de la bibliothèque. */
@@ -49,53 +146,43 @@ object FileActionsSheet {
         FileRow.bindIcon(view.findViewById(R.id.sheetIcon), file)
         view.findViewById<TextView>(R.id.sheetTitle).text = file.name
         view.findViewById<TextView>(R.id.sheetMeta).text = FileRow.meta(activity, file)
-        val container = view.findViewById<LinearLayout>(R.id.sheetActions)
+        val list = ActionList(activity, view.findViewById(R.id.sheetActions), dialog)
+        val files = listOf(file)
 
-        fun add(@DrawableRes icon: Int, @StringRes label: Int, destructive: Boolean = false, action: () -> Unit) {
-            val row = LayoutInflater.from(activity).inflate(R.layout.item_action, container, false)
-            val iconView = row.findViewById<ImageView>(R.id.actionIcon)
-            val labelView = row.findViewById<TextView>(R.id.actionLabel)
-            iconView.setImageResource(icon)
-            labelView.setText(label)
-            if (destructive) {
-                val red = ContextCompat.getColor(activity, R.color.md_error)
-                iconView.setColorFilter(red)
-                labelView.setTextColor(red)
-            }
-            row.setOnClickListener {
+        val quick = view.findViewById<View>(R.id.quickRow)
+        if (file.isFile) {
+            view.findViewById<View>(R.id.quickOpen).setOnClickListener {
                 dialog.dismiss()
-                action()
+                FileActions.open(activity, file)
             }
-            container.addView(row)
+            view.findViewById<View>(R.id.quickShare).setOnClickListener {
+                dialog.dismiss()
+                FileActions.share(activity, files)
+            }
+            view.findViewById<View>(R.id.quickExport).setOnClickListener {
+                dialog.dismiss()
+                exporter.export(file)
+            }
+        } else {
+            quick.visibility = View.GONE
         }
 
-        val files = listOf(file)
         when (file.kind) {
-            FileKind.PDF -> {
-                add(R.drawable.ic_eye, R.string.action_open) { FileActions.open(activity, file) }
-                add(R.drawable.ic_signature, R.string.action_sign) { FileActions.launchTool(activity, Tool.SIGN, files) }
-                add(R.drawable.ic_reorder, R.string.action_reorder) { FileActions.launchTool(activity, Tool.REORDER, files) }
-                add(R.drawable.ic_compress, R.string.action_compress) { FileActions.launchTool(activity, Tool.COMPRESS, files) }
-                add(R.drawable.ic_merge, R.string.action_merge) { FileActions.launchTool(activity, Tool.MERGE, files) }
-            }
+            FileKind.PDF -> ToolsSheet.addTools(list, activity, file)
             FileKind.WORD -> {
-                add(R.drawable.ic_pdf, R.string.action_convert_pdf) { FileActions.launchTool(activity, Tool.WORD, files) }
-                add(R.drawable.ic_eye, R.string.action_open) { FileActions.open(activity, file) }
+                list.header(activity.getString(R.string.convert))
+                list.add(R.drawable.ic_pdf, R.string.action_convert_pdf) { FileActions.launchTool(activity, Tool.WORD, files) }
             }
             FileKind.IMAGE -> {
-                add(R.drawable.ic_pdf, R.string.action_image_to_pdf) { FileActions.launchTool(activity, Tool.IMAGES, files) }
-                add(R.drawable.ic_eye, R.string.action_open) { FileActions.open(activity, file) }
+                list.header(activity.getString(R.string.convert))
+                list.add(R.drawable.ic_pdf, R.string.action_image_to_pdf) { FileActions.launchTool(activity, Tool.IMAGES, files) }
             }
-            FileKind.OTHER -> add(R.drawable.ic_eye, R.string.action_open) { FileActions.open(activity, file) }
-            FileKind.FOLDER -> Unit
+            else -> Unit
         }
-        if (file.isFile) {
-            add(R.drawable.ic_share, R.string.share) { FileActions.share(activity, files) }
-            add(R.drawable.ic_download, R.string.action_export) { exporter.export(file) }
-        }
-        add(R.drawable.ic_rename, R.string.action_rename) { rename(activity, file, onChanged) }
-        if (file.isFile) add(R.drawable.ic_folder_open, R.string.action_move) { move(activity, file, onChanged) }
-        add(R.drawable.ic_delete, R.string.action_delete, destructive = true) { delete(activity, file, onChanged) }
+        list.header(activity.getString(if (file.isDirectory) R.string.folder else R.string.file))
+        list.add(R.drawable.ic_rename, R.string.action_rename) { rename(activity, file, onChanged) }
+        if (file.isFile) list.add(R.drawable.ic_folder_open, R.string.action_move) { move(activity, file, onChanged) }
+        list.add(R.drawable.ic_delete, R.string.action_delete, destructive = true) { delete(activity, file, onChanged) }
 
         dialog.setContentView(view)
         dialog.show()
@@ -146,9 +233,9 @@ object FileActionsSheet {
             .show()
     }
 
-    fun folderLabel(activity: AppCompatActivity, root: File, folder: File): String {
+    fun folderLabel(context: Context, root: File, folder: File): String {
         val rel = folder.relativeTo(root).path
-        val home = activity.getString(R.string.tab_files)
+        val home = context.getString(R.string.tab_files)
         return if (rel.isEmpty()) home else "$home / ${rel.replace("/", " / ")}"
     }
 }
@@ -180,33 +267,40 @@ fun promptText(
     dialog.show()
 }
 
-/** Présentation d'un fichier dans les listes (icône colorée + métadonnées). */
+/** Présentation d'un fichier : vraie miniature pour les PDF et images, pictogramme sinon. */
 object FileRow {
 
     fun bindIcon(view: ImageView, file: File) {
-        val (icon, color) = when (file.kind) {
-            FileKind.FOLDER -> R.drawable.ic_folder to R.color.file_folder
-            FileKind.PDF -> R.drawable.ic_pdf to R.color.file_pdf
-            FileKind.WORD -> R.drawable.ic_word to R.color.file_word
-            FileKind.IMAGE -> R.drawable.ic_image to R.color.file_image
-            FileKind.OTHER -> R.drawable.ic_word to R.color.md_outline
+        val ctx = view.context
+        val dp = ctx.resources.displayMetrics.density
+        view.clearColorFilter()
+        if (file.isFile && (file.kind == FileKind.PDF || file.kind == FileKind.IMAGE)) {
+            view.setBackgroundResource(R.drawable.bg_thumb)
+            view.setPadding(1, 1, 1, 1)
+            view.scaleType = ImageView.ScaleType.CENTER_CROP
+            Thumbnails.bind(view, file, (64 * dp).toInt())
+        } else {
+            view.tag = null
+            view.setBackgroundResource(R.drawable.bg_icon_tile)
+            val pad = (12 * dp).toInt()
+            view.setPadding(pad, pad, pad, pad)
+            view.scaleType = ImageView.ScaleType.FIT_CENTER
+            view.setImageResource(
+                when (file.kind) {
+                    FileKind.FOLDER -> R.drawable.ic_folder
+                    FileKind.WORD -> R.drawable.ic_word
+                    else -> R.drawable.ic_pdf
+                },
+            )
+            view.setColorFilter(ContextCompat.getColor(ctx, if (file.kind == FileKind.FOLDER) R.color.accent else R.color.ink_soft))
         }
-        tintedIcon(view, icon, ContextCompat.getColor(view.context, color))
     }
 
-    fun meta(activity: android.content.Context, file: File): String =
+    fun meta(context: Context, file: File): String =
         if (file.isDirectory) {
             val count = file.listFiles()?.count { !it.name.startsWith(".") } ?: 0
-            activity.resources.getQuantityString(R.plurals.items_count, count, count)
+            context.resources.getQuantityString(R.plurals.items_count, count, count)
         } else {
             "${formatSize(file.length())} · ${formatDate(file.lastModified())}"
         }
-}
-
-/** Icône teintée sur une pastille de la même couleur, très atténuée. */
-fun tintedIcon(view: ImageView, @DrawableRes icon: Int, color: Int) {
-    view.setImageResource(icon)
-    view.setColorFilter(color)
-    view.setBackgroundResource(R.drawable.bg_rounded)
-    view.background.mutate().setTint((color and 0x00FFFFFF) or 0x24000000)
 }

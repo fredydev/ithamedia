@@ -1,42 +1,340 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.PdfSigner" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/md_primary</item>
-        <item name="colorOnPrimary">@color/md_on_primary</item>
-        <item name="colorPrimaryContainer">@color/md_primary_container</item>
-        <item name="colorOnPrimaryContainer">@color/md_on_primary_container</item>
-        <item name="colorSecondary">@color/md_secondary</item>
-        <item name="colorOnSecondary">@color/md_on_secondary</item>
-        <item name="colorSecondaryContainer">@color/md_secondary_container</item>
-        <item name="colorOnSecondaryContainer">@color/md_on_secondary_container</item>
-        <item name="colorTertiary">@color/md_tertiary</item>
-        <item name="colorOnTertiary">@color/md_on_tertiary</item>
-        <item name="colorError">@color/md_error</item>
-        <item name="android:colorBackground">@color/md_background</item>
-        <item name="colorOnBackground">@color/md_on_background</item>
-        <item name="colorSurface">@color/md_surface</item>
-        <item name="colorOnSurface">@color/md_on_surface</item>
-        <item name="colorSurfaceVariant">@color/md_surface_variant</item>
-        <item name="colorOnSurfaceVariant">@color/md_on_surface_variant</item>
-        <item name="colorOutline">@color/md_outline</item>
-        <item name="colorOutlineVariant">@color/md_outline_variant</item>
-        <item name="colorSurfaceContainerLowest">@color/md_surface_container_lowest</item>
-        <item name="colorSurfaceContainerLow">@color/md_surface_container_low</item>
-        <item name="colorSurfaceContainer">@color/md_surface_container</item>
-        <item name="colorSurfaceContainerHigh">@color/md_surface_container_high</item>
-        <item name="colorSurfaceContainerHighest">@color/md_surface_container_highest</item>
-        <item name="android:statusBarColor">@color/md_surface</item>
-        <item name="android:navigationBarColor">@color/md_surface_container</item>
+
+    <style name="Base.Theme.Atelier" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- L'encre sert de couleur primaire : boutons pleins noirs, pas de dégradés -->
+        <item name="colorPrimary">@color/ink</item>
+        <item name="colorOnPrimary">@color/on_ink</item>
+        <item name="colorPrimaryContainer">@color/surface_sunk</item>
+        <item name="colorOnPrimaryContainer">@color/ink</item>
+        <item name="colorSecondary">@color/ink_soft</item>
+        <item name="colorOnSecondary">@color/on_ink</item>
+        <item name="colorSecondaryContainer">@color/surface_sunk</item>
+        <item name="colorOnSecondaryContainer">@color/ink</item>
+        <item name="colorTertiary">@color/accent</item>
+        <item name="colorOnTertiary">@color/on_accent</item>
+        <item name="colorTertiaryContainer">@color/accent_soft</item>
+        <item name="colorOnTertiaryContainer">@color/accent</item>
+        <item name="colorError">@color/danger</item>
+        <item name="android:colorBackground">@color/paper</item>
+        <item name="colorOnBackground">@color/ink</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="colorSurfaceVariant">@color/surface_sunk</item>
+        <item name="colorOnSurfaceVariant">@color/muted</item>
+        <item name="colorOutline">@color/hairline_strong</item>
+        <item name="colorOutlineVariant">@color/hairline</item>
+        <item name="colorSurfaceContainerLowest">@color/surface</item>
+        <item name="colorSurfaceContainerLow">@color/surface</item>
+        <item name="colorSurfaceContainer">@color/paper</item>
+        <item name="colorSurfaceContainerHigh">@color/surface</item>
+        <item name="colorSurfaceContainerHighest">@color/surface_sunk</item>
+        <item name="colorControlNormal">@color/ink_soft</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/muted</item>
+        <item name="android:textColorHint">@color/muted</item>
+
+        <item name="android:statusBarColor">@color/paper</item>
+        <item name="android:navigationBarColor">@color/paper</item>
         <item name="android:windowLightStatusBar">@bool/light_system_bars</item>
+
+        <!-- Typographie : titres en Instrument Serif, repères en IBM Plex Mono -->
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.Atelier.Display</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Atelier.Headline</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Atelier.Headline</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Atelier.Title</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Atelier.ToolbarTitle</item>
+
+        <item name="shapeAppearanceCornerSmall">@style/Shape.Atelier.Small</item>
+        <item name="shapeAppearanceCornerMedium">@style/Shape.Atelier.Medium</item>
+        <item name="shapeAppearanceCornerLarge">@style/Shape.Atelier.Large</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/Shape.Atelier.Large</item>
+
+        <item name="materialButtonStyle">@style/Widget.Atelier.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.Atelier.Button.Outlined</item>
+        <item name="borderlessButtonStyle">@style/Widget.Atelier.Button.Text</item>
+        <item name="materialCardViewStyle">@style/Widget.Atelier.Card</item>
+        <item name="toolbarStyle">@style/Widget.Atelier.Toolbar</item>
+        <item name="bottomNavigationStyle">@style/Widget.Atelier.BottomNav</item>
+        <item name="textInputStyle">@style/Widget.Atelier.TextInput</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Atelier.Dialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Atelier.BottomSheet</item>
+        <item name="snackbarStyle">@style/Widget.Atelier.Snackbar</item>
+        <item name="chipStyle">@style/Widget.Atelier.Chip</item>
+        <item name="sliderStyle">@style/Widget.Atelier.Slider</item>
+        <item name="materialSwitchStyle">@style/Widget.Atelier.Switch</item>
     </style>
 
-    <!-- Carte d'outil sur l'écran d'accueil -->
-    <style name="Widget.App.ToolCard" parent="Widget.Material3.CardView.Filled">
-        <item name="cardBackgroundColor">?attr/colorSurfaceContainerLow</item>
-        <item name="cardCornerRadius">20dp</item>
+    <style name="Theme.PdfSigner" parent="Base.Theme.Atelier" />
+
+    <!-- Formes : angles francs et discrets -->
+    <style name="Shape.Atelier.Small" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+    <style name="Shape.Atelier.Medium" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+    <style name="Shape.Atelier.Large" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">18dp</item>
     </style>
 
-    <style name="TextAppearance.App.Section" parent="TextAppearance.Material3.TitleMedium">
-        <item name="android:textStyle">bold</item>
+    <!-- Texte -->
+    <style name="TextAppearance.Atelier.Display" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="fontFamily">@font/instrument_serif</item>
+        <item name="android:fontFamily">@font/instrument_serif</item>
+        <item name="android:textSize">44sp</item>
+        <item name="android:letterSpacing">-0.015</item>
+        <item name="android:textColor">@color/ink</item>
     </style>
+    <style name="TextAppearance.Atelier.DisplayItalic" parent="TextAppearance.Atelier.Display">
+        <item name="fontFamily">@font/instrument_serif_italic</item>
+        <item name="android:fontFamily">@font/instrument_serif_italic</item>
+        <item name="android:textColor">@color/muted</item>
+    </style>
+    <style name="TextAppearance.Atelier.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="fontFamily">@font/instrument_serif</item>
+        <item name="android:fontFamily">@font/instrument_serif</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+    <style name="TextAppearance.Atelier.Title" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="fontFamily">@font/instrument_serif</item>
+        <item name="android:fontFamily">@font/instrument_serif</item>
+        <item name="android:textSize">26sp</item>
+    </style>
+    <style name="TextAppearance.Atelier.ToolbarTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">@font/instrument_serif</item>
+        <item name="android:fontFamily">@font/instrument_serif</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+    <style name="TextAppearance.Atelier.Label" parent="TextAppearance.Material3.LabelSmall">
+        <item name="fontFamily">@font/plex_mono_medium</item>
+        <item name="android:fontFamily">@font/plex_mono_medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/muted</item>
+    </style>
+    <style name="TextAppearance.Atelier.Meta" parent="TextAppearance.Material3.BodySmall">
+        <item name="fontFamily">@font/plex_mono</item>
+        <item name="android:fontFamily">@font/plex_mono</item>
+        <item name="android:textSize">11.5sp</item>
+        <item name="android:textColor">@color/muted</item>
+    </style>
+    <style name="TextAppearance.Atelier.Number" parent="TextAppearance.Atelier.Meta">
+        <item name="fontFamily">@font/plex_mono_medium</item>
+        <item name="android:fontFamily">@font/plex_mono_medium</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    <style name="TextAppearance.Atelier.RowTitle" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.Atelier.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/muted</item>
+        <item name="android:lineSpacingMultiplier">1.15</item>
+    </style>
+    <style name="TextAppearance.Atelier.Button" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <!-- Boutons -->
+    <style name="Widget.Atelier.Button" parent="Widget.Material3.Button">
+        <item name="shapeAppearance">@style/Shape.Atelier.Small</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:insetTop">2dp</item>
+        <item name="android:insetBottom">2dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Atelier.Button</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="iconPadding">10dp</item>
+        <item name="iconSize">19dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+    <style name="Widget.Atelier.Button.Accent">
+        <item name="backgroundTint">@color/accent</item>
+        <item name="android:textColor">@color/on_accent</item>
+        <item name="iconTint">@color/on_accent</item>
+    </style>
+    <style name="Widget.Atelier.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="shapeAppearance">@style/Shape.Atelier.Small</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:insetTop">2dp</item>
+        <item name="android:insetBottom">2dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Atelier.Button</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="iconTint">@color/ink</item>
+        <item name="strokeColor">@color/hairline_strong</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="iconPadding">10dp</item>
+        <item name="iconSize">19dp</item>
+    </style>
+    <style name="Widget.Atelier.Button.Tonal" parent="Widget.Material3.Button.TonalButton">
+        <item name="shapeAppearance">@style/Shape.Atelier.Small</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:insetTop">2dp</item>
+        <item name="android:insetBottom">2dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Atelier.Button</item>
+        <item name="backgroundTint">@color/surface_sunk</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="iconTint">@color/ink</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconSize">19dp</item>
+    </style>
+    <style name="Widget.Atelier.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textAppearance">@style/TextAppearance.Atelier.Button</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="iconTint">@color/ink</item>
+        <item name="shapeAppearance">@style/Shape.Atelier.Small</item>
+    </style>
+    <style name="Widget.Atelier.Button.Link" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textAppearance">@style/TextAppearance.Atelier.Label</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+    </style>
+    <!-- Touche de la palette Remplir & signer : icône au-dessus, libellé mono -->
+    <style name="Widget.Atelier.ToolKey" parent="Widget.Material3.Button.TextButton">
+        <item name="iconGravity">top</item>
+        <item name="iconPadding">4dp</item>
+        <item name="iconSize">22dp</item>
+        <item name="iconTint">@color/ink</item>
+        <item name="android:textColor">@color/ink_soft</item>
+        <item name="android:textAppearance">@style/TextAppearance.Atelier.Meta</item>
+        <item name="android:textSize">10.5sp</item>
+        <item name="android:minWidth">68dp</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:paddingStart">6dp</item>
+        <item name="android:paddingEnd">6dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="shapeAppearance">@style/Shape.Atelier.Small</item>
+    </style>
+
+    <style name="Widget.Atelier.IconButton" parent="Widget.Material3.Button.IconButton">
+        <item name="iconTint">@color/ink</item>
+        <item name="iconSize">22dp</item>
+    </style>
+
+    <!-- Cartes : filets fins, aucune ombre -->
+    <style name="Widget.Atelier.Card" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="strokeColor">@color/hairline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cardCornerRadius">14dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+    <style name="Widget.Atelier.Card.Ink">
+        <item name="cardBackgroundColor">@color/ink</item>
+        <item name="strokeColor">@color/ink</item>
+    </style>
+    <style name="Widget.Atelier.Card.Choice">
+        <item name="checkedIconTint">@color/accent</item>
+        <item name="strokeColor">@color/selector_card_stroke</item>
+        <item name="android:checkable">true</item>
+    </style>
+    <!-- Compatibilité avec les écrans existants -->
+    <style name="Widget.App.ToolCard" parent="Widget.Atelier.Card" />
+
+    <style name="Widget.Atelier.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@drawable/bg_toolbar</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Atelier.ToolbarTitle</item>
+        <item name="subtitleTextAppearance">@style/TextAppearance.Atelier.Meta</item>
+        <item name="navigationIconTint">@color/ink</item>
+    </style>
+
+    <style name="Widget.Atelier.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@drawable/bg_bottom_nav</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.Atelier.BottomNav.Indicator</item>
+        <item name="itemIconTint">@color/selector_nav</item>
+        <item name="itemTextColor">@color/selector_nav</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.Atelier.Label</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.Atelier.Label</item>
+        <item name="elevation">0dp</item>
+    </style>
+    <style name="Widget.Atelier.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/surface_sunk</item>
+        <item name="shapeAppearance">@style/Shape.Atelier.Small</item>
+    </style>
+
+    <style name="Widget.Atelier.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/selector_input_stroke</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="boxBackgroundColor">@color/surface</item>
+        <item name="hintTextColor">@color/ink</item>
+    </style>
+
+    <style name="Widget.Atelier.Chip" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/selector_chip_bg</item>
+        <item name="chipStrokeColor">@color/hairline_strong</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/selector_chip_text</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="shapeAppearance">@style/Shape.Atelier.Small</item>
+        <item name="chipMinHeight">38dp</item>
+    </style>
+
+    <style name="Widget.Atelier.Slider" parent="Widget.Material3.Slider">
+        <item name="trackColorActive">@color/ink</item>
+        <item name="trackColorInactive">@color/hairline</item>
+        <item name="thumbColor">@color/ink</item>
+        <item name="haloColor">@color/surface_sunk</item>
+        <item name="tickVisible">false</item>
+    </style>
+
+    <style name="Widget.Atelier.Switch" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="thumbTint">@color/selector_switch_thumb</item>
+        <item name="trackTint">@color/selector_switch_track</item>
+        <item name="trackDecorationTint">@color/hairline_strong</item>
+    </style>
+
+    <style name="Widget.Atelier.Snackbar" parent="Widget.Material3.Snackbar">
+        <item name="backgroundTint">@color/ink</item>
+        <item name="actionTextColorAlpha">1</item>
+    </style>
+
+    <style name="ThemeOverlay.Atelier.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceContainerHigh">@color/surface</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/Shape.Atelier.Large</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/Atelier.DialogTitle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Atelier.Button.Text</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Atelier.Button.Text</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Atelier.Button.Text</item>
+    </style>
+    <style name="Atelier.DialogTitle" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textAppearance">@style/TextAppearance.Atelier.Title</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <style name="ThemeOverlay.Atelier.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Atelier.BottomSheet</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+    </style>
+    <style name="Widget.Atelier.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/surface</item>
+        <item name="shapeAppearance">@style/Shape.Atelier.SheetTop</item>
+    </style>
+    <style name="Shape.Atelier.SheetTop" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">20dp</item>
+        <item name="cornerSizeTopRight">20dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="TextAppearance.App.Section" parent="TextAppearance.Atelier.Label" />
 </resources>

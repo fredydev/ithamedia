@@ -1,5 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lucide (ISC) : check -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
     android:tint="?attr/colorControlNormal">
-    <path android:fillColor="@android:color/white" android:pathData="M9,16.17L4.83,12l-1.42,1.42L9,19 21,7l-1.41,-1.41z" />
+    <path
+        android:pathData="M20 6 9 17l-5-5"
+        android:strokeWidth="1.75"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
 </vector>

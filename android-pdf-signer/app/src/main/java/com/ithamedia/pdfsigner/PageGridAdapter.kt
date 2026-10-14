@@ -27,6 +27,11 @@ class PageGridAdapter(
     private val loadThumb: (GridPage, (Bitmap) -> Unit) -> Unit,
     private val onDelete: (position: Int) -> Unit,
     private val onChanged: () -> Unit = {},
+    /** Mode sélection : un appui coche/décoche la page (et masque les boutons de la vignette). */
+    private val selection: MutableSet<GridPage>? = null,
+    private val onSelectionChanged: () -> Unit = {},
+    /** Appelé avant chaque déplacement, pour l'historique d'annulation. */
+    private val beforeMove: () -> Unit = {},
 ) : RecyclerView.Adapter<PageGridAdapter.Holder>() {
 
     class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -34,6 +39,8 @@ class PageGridAdapter(
         val number: TextView = view.findViewById(R.id.pageNumber)
         val rotate: View = view.findViewById(R.id.pageRotate)
         val delete: View = view.findViewById(R.id.pageDelete)
+        val actions: View = view.findViewById(R.id.pageActions)
+        val check: View = view.findViewById(R.id.pageCheck)
         var bound: GridPage? = null
     }
 
@@ -49,6 +56,24 @@ class PageGridAdapter(
         holder.thumb.setImageDrawable(null)
         loadThumb(item) { bitmap ->
             if (holder.bound === item) holder.thumb.setImageBitmap(rotated(bitmap, item.rotation))
+        }
+        val card = holder.itemView as com.google.android.material.card.MaterialCardView
+        val ctx = holder.itemView.context
+        val density = ctx.resources.displayMetrics.density
+        val isSelected = selection?.contains(item) == true
+        holder.actions.visibility = if (selection != null) View.GONE else View.VISIBLE
+        holder.check.visibility = if (isSelected) View.VISIBLE else View.GONE
+        card.strokeWidth = ((if (isSelected) 2.5f else 1f) * density).toInt()
+        card.strokeColor = androidx.core.content.ContextCompat.getColor(ctx, if (isSelected) R.color.accent else R.color.hairline)
+        if (selection != null) {
+            holder.itemView.setOnClickListener {
+                val pos = holder.bindingAdapterPosition
+                if (pos == RecyclerView.NO_POSITION) return@setOnClickListener
+                val page = items[pos]
+                if (!selection.remove(page)) selection.add(page)
+                notifyItemChanged(pos)
+                onSelectionChanged()
+            }
         }
         holder.rotate.setOnClickListener {
             val pos = holder.bindingAdapterPosition
@@ -83,6 +108,7 @@ class PageGridAdapter(
             override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
                 super.onSelectedChanged(viewHolder, actionState)
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                    beforeMove()
                     viewHolder?.itemView?.animate()?.scaleX(1.06f)?.scaleY(1.06f)?.setDuration(120)?.start()
                 }
             }
