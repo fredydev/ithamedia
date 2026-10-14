@@ -7,25 +7,25 @@
     android:viewportHeight="24"
     android:tint="?attr/colorControlNormal">
     <path
-        android:pathData="M4,3h5a1,1 0 0,1 1,1v7a1,1 0 0,1 -1,1h-5a1,1 0 0,1 -1,-1v-7a1,1 0 0,1 1,-1z"
+        android:pathData="M 4 3 h 5 a 1 1 0 0 1 1 1 v 7 a 1 1 0 0 1 -1 1 h -5 a 1 1 0 0 1 -1 -1 v -7 a 1 1 0 0 1 1 -1 z"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M15,3h5a1,1 0 0,1 1,1v3a1,1 0 0,1 -1,1h-5a1,1 0 0,1 -1,-1v-3a1,1 0 0,1 1,-1z"
+        android:pathData="M 15 3 h 5 a 1 1 0 0 1 1 1 v 3 a 1 1 0 0 1 -1 1 h -5 a 1 1 0 0 1 -1 -1 v -3 a 1 1 0 0 1 1 -1 z"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M15,12h5a1,1 0 0,1 1,1v7a1,1 0 0,1 -1,1h-5a1,1 0 0,1 -1,-1v-7a1,1 0 0,1 1,-1z"
+        android:pathData="M 15 12 h 5 a 1 1 0 0 1 1 1 v 7 a 1 1 0 0 1 -1 1 h -5 a 1 1 0 0 1 -1 -1 v -7 a 1 1 0 0 1 1 -1 z"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M4,16h5a1,1 0 0,1 1,1v3a1,1 0 0,1 -1,1h-5a1,1 0 0,1 -1,-1v-3a1,1 0 0,1 1,-1z"
+        android:pathData="M 4 16 h 5 a 1 1 0 0 1 1 1 v 3 a 1 1 0 0 1 -1 1 h -5 a 1 1 0 0 1 -1 -1 v -3 a 1 1 0 0 1 1 -1 z"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"

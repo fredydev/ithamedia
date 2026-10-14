@@ -33,112 +33,112 @@
         <activity
             android:name=".SignActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ScanActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".OrganizeActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".MergeActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".SplitActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CropActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".WordToPdfActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".TextToPdfActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".BlankPdfActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".OcrActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ExportActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".FormActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".AnnotateActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".StampTextActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ProtectActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".UnlockActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".RedactActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".SanitizeActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CompressActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".CompareActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".PropertiesActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ViewerActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:exported="false"
+            android:exported="${toolsExported}"
             android:windowSoftInputMode="adjustResize" />
 
         <provider

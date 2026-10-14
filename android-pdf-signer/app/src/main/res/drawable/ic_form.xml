@@ -7,31 +7,31 @@
     android:viewportHeight="24"
     android:tint="?attr/colorControlNormal">
     <path
-        android:pathData="M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6"
+        android:pathData="M 12 20 h -1 a 2 2 0 0 1 -2 -2 a 2 2 0 0 1 -2 2 H 6"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7"
+        android:pathData="M 13 8 h 7 a 2 2 0 0 1 2 2 v 4 a 2 2 0 0 1 -2 2 h -7"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1"
+        android:pathData="M 5 16 H 4 a 2 2 0 0 1 -2 -2 v -4 a 2 2 0 0 1 2 -2 h 1"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1"
+        android:pathData="M 6 4 h 1 a 2 2 0 0 1 2 2 a 2 2 0 0 1 2 -2 h 1"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M9 6v12"
+        android:pathData="M 9 6 v 12"
         android:strokeWidth="1.75"
         android:strokeColor="#FFFFFFFF"
         android:strokeLineCap="round"

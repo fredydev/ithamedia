@@ -1,25 +1,90 @@
 #!/usr/bin/env bash
-# Lance l'app sur l'émulateur et échoue si elle plante, en affichant la pile d'appels.
+# Test sur émulateur : lance l'app, parcourt l'accueil, Mes fichiers et chaque outil sur un
+# PDF d'exemple, filme l'écran, prend des captures et échoue au premier plantage.
 set -u
 PKG=com.ithamedia.pdfsigner
-mkdir -p smoke
+OUT=smoke
+mkdir -p $OUT/screens
+crashed=0
+
+check_crash() {
+  if adb logcat -d -s AndroidRuntime:E | grep -q "FATAL EXCEPTION"; then
+    echo "!!!!! PLANTAGE après : $1"
+    adb logcat -d -s AndroidRuntime:E | tee -a $OUT/crash.txt
+    adb logcat -c
+    crashed=1
+  fi
+}
+shot() {
+  adb exec-out screencap -p > "$OUT/screens/$1.png"
+}
+
 adb install -r app/build/outputs/apk/debug/app-debug.apk
+python3 ../.github/scripts/sample_pdf.py $OUT/Exemple.pdf
+adb push $OUT/Exemple.pdf /data/local/tmp/Exemple.pdf
+
 adb logcat -c
+# Vidéo de tout le parcours (limite Android : 180 s par enregistrement)
+adb shell screenrecord --bit-rate 6000000 --time-limit 175 /sdcard/parcours.mp4 &
+REC=$!
+sleep 1
+
 adb shell am start -W -n $PKG/.HomeActivity
-sleep 10
-adb exec-out screencap -p > smoke/home.png
-# Bascule sur l'onglet Mes fichiers (bas de l'écran, à droite) puis revient
-adb shell input tap 810 2280 || true
+sleep 6
+check_crash "lancement"
+shot 01-accueil
+# Copie le PDF d'exemple dans Mes fichiers (stockage privé de l'app, possible en debug)
+adb shell run-as $PKG mkdir -p files/Documents
+adb shell "cat /data/local/tmp/Exemple.pdf | run-as $PKG sh -c 'cat > files/Documents/Exemple.pdf'"
+DOC=/data/user/0/$PKG/files/Documents/Exemple.pdf
+
+SIZE=$(adb shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1)
+W=${SIZE%x*}; H=${SIZE#*x}
+adb shell input swipe $((W/2)) $((H*3/4)) $((W/2)) $((H/4)) 400
+sleep 2
+shot 02-accueil-outils
+adb shell input swipe $((W/2)) $((H*3/4)) $((W/2)) $((H/4)) 400
+sleep 2
+shot 03-accueil-catalogue
+
+adb shell am start -n $PKG/.HomeActivity --es folder /data/user/0/$PKG/files/Documents
 sleep 3
-adb exec-out screencap -p > smoke/files.png
-adb logcat -d > smoke/logcat.txt
-echo "===== AndroidRuntime ====="
-adb logcat -d -s AndroidRuntime:E | tee smoke/crash.txt
-if adb shell pidof $PKG > /dev/null; then
-  echo "APP RUNNING"
-else
-  echo "APP NOT RUNNING"
-fi
-if grep -q "FATAL EXCEPTION" smoke/crash.txt; then
+check_crash "Mes fichiers"
+shot 04-mes-fichiers
+
+i=10
+for spec in \
+  ViewerActivity: \
+  OrganizeActivity:ORGANIZE SplitActivity:SPLIT CropActivity:CROP \
+  SignActivity:SIGN SignActivity:STAMP AnnotateActivity:ANNOTATE \
+  StampTextActivity:WATERMARK StampTextActivity:PAGE_NUMBERS StampTextActivity:HEADER_FOOTER StampTextActivity:BATES \
+  ProtectActivity:PROTECT RedactActivity:REDACT SanitizeActivity:SANITIZE \
+  CompressActivity:COMPRESS PropertiesActivity:PROPERTIES OcrActivity:OCR \
+  ExportActivity:TO_IMAGES ExportActivity:TO_WORD FormActivity:FORM \
+  MergeActivity:MERGE CompareActivity:COMPARE \
+  TextToPdfActivity:TEXT BlankPdfActivity:BLANK; do
+  act=${spec%%:*}; tool=${spec#*:}
+  extra=""
+  [ -n "$tool" ] && extra="--es tool $tool"
+  adb shell am start -n $PKG/.$act $extra --esal paths $DOC
+  sleep 4
+  check_crash "$act $tool"
+  shot "$i-${tool:-$act}"
+  i=$((i+1))
+  adb shell input keyevent KEYCODE_BACK
+  sleep 1
+  adb shell input keyevent KEYCODE_BACK
+  sleep 1
+done
+
+adb shell pkill -INT screenrecord || true
+wait $REC 2>/dev/null || true
+sleep 3
+adb pull /sdcard/parcours.mp4 $OUT/parcours.mp4 || true
+adb logcat -d > $OUT/logcat.txt
+
+if [ $crashed -ne 0 ]; then
+  echo "===== Des plantages ont été détectés (voir ci-dessus) ====="
   exit 1
 fi
+echo "===== Aucun plantage ====="

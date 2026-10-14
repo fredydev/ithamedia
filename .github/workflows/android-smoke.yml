@@ -33,11 +33,16 @@ jobs:
           api-level: 30
           arch: x86_64
           target: google_apis
+          profile: pixel_6
           disable-animations: true
           working-directory: android-pdf-signer
           script: bash ../.github/scripts/smoke.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: smoke-results
-          path: android-pdf-signer/smoke/
+          name: emulateur-captures-et-video
+          path: |
+            android-pdf-signer/smoke/screens/
+            android-pdf-signer/smoke/parcours.mp4
+            android-pdf-signer/smoke/crash.txt
+            android-pdf-signer/smoke/logcat.txt

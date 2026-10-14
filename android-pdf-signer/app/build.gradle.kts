@@ -13,9 +13,14 @@ android {
         targetSdk = 34
         versionCode = 3
         versionName = "3.0"
+        // Écrans d'outils ouvrables par adb uniquement en debug (test sur émulateur)
+        manifestPlaceholders["toolsExported"] = "false"
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["toolsExported"] = "true"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
