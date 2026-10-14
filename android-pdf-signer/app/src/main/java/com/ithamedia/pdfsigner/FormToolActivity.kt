@@ -79,6 +79,10 @@ abstract class FormToolActivity : BaseToolActivity() {
 
     protected open fun onSourceReady(file: File) {}
 
+    protected fun setPrimaryVisible(visible: Boolean) {
+        (primary.parent as View).visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
     private fun buildForm() {
         optionsHost.removeAllViews()
         options = Options(optionsHost) { refreshPreview() }

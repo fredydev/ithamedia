@@ -66,6 +66,7 @@ class FormActivity : FormToolActivity() {
     override fun buildOptions(o: Options) {
         val list = specs ?: return
         inputs.clear()
+        setPrimaryVisible(list.isNotEmpty())
         if (list.isEmpty()) {
             o.section(getString(R.string.form_none_title))
             o.note(getString(R.string.form_none_body))

@@ -50,6 +50,8 @@ class Options(private val container: LinearLayout, private val onChange: () -> U
             multiline -> inputType or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             else -> inputType
         }
+        // Android affiche les mots de passe en chasse fixe par défaut : on garde la police du thème
+        if (password) edit.typeface = android.graphics.Typeface.DEFAULT
         if (multiline) {
             edit.minLines = 6
             edit.gravity = Gravity.TOP or Gravity.START
