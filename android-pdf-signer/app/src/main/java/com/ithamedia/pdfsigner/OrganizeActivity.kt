@@ -105,7 +105,7 @@ class OrganizeActivity : BaseToolActivity() {
         loaders += loader
         toolbar.subtitle = file.name
         repeat(loader.pageCount) { pages += GridPage(PageKey(0, it)) }
-        notifyAll()
+        refreshGrid()
     }
 
     private fun openLoader(file: File): PdfPageLoader? = try {
@@ -135,7 +135,7 @@ class OrganizeActivity : BaseToolActivity() {
         pages.clear()
         snapshot.forEach { (key, rotation) -> pages += GridPage(key, rotation) }
         selection.clear()
-        notifyAll()
+        refreshGrid()
     }
 
     // --- Actions -----------------------------------------------------------------------------
@@ -148,7 +148,7 @@ class OrganizeActivity : BaseToolActivity() {
         remember()
         val at = insertionIndex()
         pages.add(at, GridPage(BlankKey))
-        notifyAll()
+        refreshGrid()
         grid.scrollToPosition(at)
     }
 
@@ -160,7 +160,7 @@ class OrganizeActivity : BaseToolActivity() {
         loaders += loader
         val at = insertionIndex()
         pages.addAll(at, List(loader.pageCount) { GridPage(PageKey(sourceIndex, it)) })
-        notifyAll()
+        refreshGrid()
         grid.scrollToPosition(at)
         toast(resources.getQuantityString(R.plurals.pages_inserted, loader.pageCount, loader.pageCount))
     }
@@ -168,7 +168,7 @@ class OrganizeActivity : BaseToolActivity() {
     private fun rotateSelection() {
         remember()
         selection.forEach { it.rotation = (it.rotation + 90) % 360 }
-        notifyAll()
+        refreshGrid()
     }
 
     private fun duplicateSelection() {
@@ -180,7 +180,7 @@ class OrganizeActivity : BaseToolActivity() {
             pages.add(pos + offset + 1, GridPage(original.key, original.rotation))
             offset++
         }
-        notifyAll()
+        refreshGrid()
     }
 
     private fun deleteSelection() {
@@ -191,22 +191,22 @@ class OrganizeActivity : BaseToolActivity() {
         remember()
         pages.removeAll(selection)
         selection.clear()
-        notifyAll()
+        refreshGrid()
     }
 
     private fun selectAll() {
         selection.clear()
         selection.addAll(pages)
-        notifyAll()
+        refreshGrid()
     }
 
     private fun clearSelection() {
         selection.clear()
-        notifyAll()
+        refreshGrid()
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun notifyAll() {
+    private fun refreshGrid() {
         adapter.notifyDataSetChanged()
         updateUi()
     }
