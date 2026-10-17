@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Uniquement dans l'APK debug : banc d'essai lancé par le test sur émulateur -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".DevCompressActivity"
+            android:exported="true" />
+    </application>
+</manifest>

@@ -77,6 +77,23 @@ for spec in \
   sleep 1
 done
 
+# Banc d'essai de la compression : PDF aux images variées, rendu des pages avant/après
+python3 ../.github/scripts/compress_test_pdf.py $OUT/compress-test.pdf
+adb push $OUT/compress-test.pdf /data/local/tmp/compress-test.pdf
+adb shell "cat /data/local/tmp/compress-test.pdf | run-as $PKG sh -c 'cat > files/compress-test.pdf'"
+adb shell am start -n $PKG/.DevCompressActivity --es path /data/user/0/$PKG/files/compress-test.pdf
+for _ in $(seq 1 60); do
+  adb shell run-as $PKG test -f files/selftest/done && break
+  sleep 2
+done
+check_crash "banc compression"
+mkdir -p $OUT/compress
+for f in $(adb shell run-as $PKG ls files/selftest | tr -d '\r'); do
+  adb exec-out run-as $PKG cat "files/selftest/$f" > "$OUT/compress/$f"
+done
+echo "===== Compression ====="
+cat $OUT/compress/report.txt || echo "pas de rapport"
+
 adb shell pkill -INT screenrecord || true
 wait $REC 2>/dev/null || true
 sleep 3

@@ -128,12 +128,12 @@ Scannez un document ou ajoutez des images.</string>
     <string name="merge_default_name">Fusion %1$s</string>
     <string name="compress_level">Niveau de compression</string>
     <string name="compress_best">Qualité maximale · recommandé</string>
-    <string name="compress_best_sub">Réduit seulement les images surdimensionnées (220 ppp). Aucune différence visible, même imprimé.</string>
+    <string name="compress_best_sub">Les images sont ramenées à 200 ppp à leur taille réelle d\'affichage. Aucune différence visible, même imprimé.</string>
     <string name="compress_balanced">Équilibré</string>
     <string name="compress_balanced_sub">Images à 150 ppp. Idéal pour l\'écran et l\'envoi par e-mail.</string>
     <string name="compress_strong">Compression forte</string>
-    <string name="compress_strong_sub">Images à 110 ppp. Fichier le plus léger, détails des photos un peu adoucis.</string>
-    <string name="compress_note">Le texte et les dessins vectoriels ne sont jamais modifiés : ils restent parfaitement nets. Seules les images sont optimisées.</string>
+    <string name="compress_strong_sub">Images à 100 ppp. Fichier le plus léger, détails des photos un peu adoucis.</string>
+    <string name="compress_note">Le texte et les dessins vectoriels ne sont jamais modifiés : ils restent parfaitement nets. Les images transparentes ou en couleurs d\'impression spéciales sont conservées telles quelles. Les données d\'édition cachées (Illustrator, Photoshop) et les vignettes sont retirées.</string>
     <string name="compress_action">Compresser</string>
     <string name="compressing">Compression…</string>
     <string name="compress_result">%1$s → %2$s · %3$d %% plus léger</string>

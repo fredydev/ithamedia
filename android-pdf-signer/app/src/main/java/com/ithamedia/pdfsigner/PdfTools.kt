@@ -57,25 +57,30 @@ object PdfTools {
         }
     }
 
-    // --- Compresser --------------------------------------------------------------------------
+    // --- Compresser ------------------------------------------------------------------------
 
     /**
      * Niveau de compression. Seules les images sont recompressées : texte et dessins
      * vectoriels restent intacts, donc parfaitement nets.
      */
-    enum class Level(val maxDpi: Int, val jpegQuality: Float, val recompressJpeg: Boolean) {
-        /** Ne touche qu'aux images surdimensionnées, ré-encodées en haute qualité. */
-        BEST(220, 0.88f, false),
-        BALANCED(150, 0.78f, true),
-        STRONG(110, 0.65f, true),
+    enum class Level(val maxDpi: Int, val jpegQuality: Float, val minGain: Double) {
+        /** Images ramenées à 200 ppp à leur taille réelle d'affichage, JPEG très haute qualité. */
+        BEST(200, 0.86f, 0.25),
+        BALANCED(150, 0.76f, 0.10),
+        STRONG(100, 0.62f, 0.05),
     }
 
     data class CompressStats(val imagesOptimized: Int)
+
+    private val PIECE_INFO: COSName = COSName.getPDFName("PieceInfo")
+    private val THUMB: COSName = COSName.getPDFName("Thumb")
 
     fun compress(source: File, output: File, level: Level): CompressStats {
         var optimized = 0
         PDDocument.load(source).use { doc ->
             if (doc.isEncrypted) doc.isAllSecurityToBeRemoved = true
+            // Taille réelle d'affichage de chaque image, lue dans le contenu des pages
+            val displayed = ImageSizes().apply { for (page in doc.pages) runCatching { processPage(page) } }.sizes
             val visited: MutableSet<COSBase> = Collections.newSetFromMap(IdentityHashMap())
             val replacements = IdentityHashMap<COSBase, PDImageXObject>()
 
@@ -92,7 +97,7 @@ object PdfTools {
                                 continue
                             }
                             if (!visited.add(key)) continue
-                            val smaller = recompress(doc, xObject, page, level) ?: continue
+                            val smaller = recompress(doc, xObject, page, displayed[key], level) ?: continue
                             replacements[key] = smaller
                             resources.put(name, smaller)
                             optimized++
@@ -102,34 +107,84 @@ object PdfTools {
                 }
             }
 
-            for (page in doc.pages) process(page.resources, page)
+            for (page in doc.pages) {
+                process(page.resources, page)
+                // Données privées d'Illustrator/Photoshop et vignettes : souvent très lourdes, jamais affichées
+                page.cosObject.removeItem(PIECE_INFO)
+                page.cosObject.removeItem(THUMB)
+                compressContents(doc, page)
+            }
+            doc.documentCatalog.cosObject.removeItem(PIECE_INFO)
             doc.save(output)
         }
         return CompressStats(optimized)
     }
 
-    private fun recompress(doc: PDDocument, image: PDImageXObject, page: PDPage, level: Level): PDImageXObject? {
-        val stream = image.cosObject
-        // Transparence, masques et CMJN : laissés tels quels pour ne rien dégrader
-        if (image.isStencil || stream.containsKey(COSName.SMASK) || stream.containsKey(COSName.MASK)) return null
-        if (image.bitsPerComponent == 1) return null
-        val components = runCatching { image.colorSpace.numberOfComponents }.getOrDefault(0)
-        if (components !in setOf(1, 3)) return null
-        val originalSize = stream.length
-        if (originalSize < 24 * 1024) return null
+    /** Recompresse en Flate les flux de contenu de page enregistrés sans compression. */
+    private fun compressContents(doc: PDDocument, page: PDPage) {
+        val contents = page.cosObject.getDictionaryObject(COSName.CONTENTS)
+        val streams = when (contents) {
+            is com.tom_roush.pdfbox.cos.COSStream -> listOf(contents)
+            is com.tom_roush.pdfbox.cos.COSArray -> (0 until contents.size()).mapNotNull { contents.getObject(it) as? com.tom_roush.pdfbox.cos.COSStream }
+            else -> emptyList()
+        }
+        if (streams.isEmpty() || streams.all { it.filters != null }) return
+        runCatching {
+            val merged = page.contents.use { it.readBytes() }
+            val stream = com.tom_roush.pdfbox.pdmodel.common.PDStream(doc, merged.inputStream(), COSName.FLATE_DECODE)
+            page.setContents(stream)
+        }
+    }
 
-        // Hypothèse prudente : l'image peut occuper toute la page
-        val box = page.mediaBox
-        val pageInches = max(box.width, box.height) / 72f
-        val maxPixels = (pageInches * level.maxDpi).roundToInt()
-        val longSide = max(image.width, image.height)
-        val needsDownscale = longSide > maxPixels * 1.1f
-        if (!needsDownscale && image.suffix == "jpg" && !level.recompressJpeg) return null
+    /** Espaces de couleur que le décodeur gère sans approximation (pas de tons directs ni CMJN). */
+    private fun safeColorSpace(image: PDImageXObject): Boolean {
+        val cs = runCatching { image.colorSpace }.getOrNull() ?: return false
+        return when (cs) {
+            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceRGB,
+            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceGray -> true
+            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDICCBased -> cs.numberOfComponents == 1 || cs.numberOfComponents == 3
+            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDIndexed -> {
+                val base = cs.baseColorSpace
+                base is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceRGB ||
+                    base is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceGray ||
+                    (base is com.tom_roush.pdfbox.pdmodel.graphics.color.PDICCBased && base.numberOfComponents in setOf(1, 3))
+            }
+            else -> false
+        }
+    }
+
+    private fun recompress(doc: PDDocument, image: PDImageXObject, page: PDPage, shownPts: FloatArray?, level: Level): PDImageXObject? {
+        val stream = image.cosObject
+        // Transparence, masques, tons directs, CMJN, inversions : laissés tels quels pour ne rien dégrader
+        if (image.isStencil || stream.containsKey(COSName.SMASK) || stream.containsKey(COSName.MASK)) return null
+        if (stream.containsKey(COSName.DECODE) || !safeColorSpace(image)) return null
+        val indexed = runCatching { image.colorSpace }.getOrNull() is com.tom_roush.pdfbox.pdmodel.graphics.color.PDIndexed
+        if (image.bitsPerComponent !in setOf(8, 16) && !indexed) return null
+        if (image.suffix == "jpx" || image.suffix == "jb2") return null
+        val originalSize = stream.length
+        if (originalSize < 16 * 1024) return null
+
+        // Pixels utiles : taille d'affichage réelle si connue, sinon page entière (prudent)
+        val target = if (shownPts != null) {
+            maxOf(shownPts[0] / 72f * level.maxDpi / image.width, shownPts[1] / 72f * level.maxDpi / image.height)
+        } else {
+            val box = page.mediaBox
+            (max(box.width, box.height) / 72f * level.maxDpi) / max(image.width, image.height)
+        }
+        val scale = target.coerceAtMost(1f)
+        val needsDownscale = scale < 0.87f
+        if (!needsDownscale && image.suffix == "jpg" && level == Level.BEST) return null
 
         return try {
-            var bitmap = image.image ?: return null
+            val decoded = image.image ?: return null
+            val opaque = flattenOnWhite(decoded)
+            if (opaque !== decoded) decoded.recycle()
+            if (looksBroken(opaque)) {
+                opaque.recycle()
+                return null
+            }
+            var bitmap = opaque
             if (needsDownscale) {
-                val scale = maxPixels.toFloat() / longSide
                 val scaled = Bitmap.createScaledBitmap(
                     bitmap,
                     (bitmap.width * scale).roundToInt().coerceAtLeast(1),
@@ -142,9 +197,86 @@ object PdfTools {
             val candidate = JPEGFactory.createFromImage(doc, bitmap, level.jpegQuality)
             bitmap.recycle()
             // On ne garde la nouvelle version que si le gain est réel
-            if (candidate.cosObject.length < originalSize * 0.9) candidate else null
+            if (candidate.cosObject.length < originalSize * (1 - level.minGain)) candidate else null
         } catch (_: Throwable) {
             null
+        }
+    }
+
+    /**
+     * Pose l'image sur un fond blanc opaque (le JPEG ne connaît pas la transparence, qui sortirait
+     * en noir). Gère aussi les images en niveaux de gris stockées en ALPHA_8.
+     */
+    private fun flattenOnWhite(src: Bitmap): Bitmap {
+        if (src.config == Bitmap.Config.ALPHA_8) {
+            val w = src.width
+            val h = src.height
+            val buffer = java.nio.ByteBuffer.allocate(src.rowBytes * h)
+            src.copyPixelsToBuffer(buffer)
+            val bytes = buffer.array()
+            val pixels = IntArray(w * h)
+            for (y in 0 until h) for (x in 0 until w) {
+                val v = bytes[y * src.rowBytes + x].toInt() and 0xFF
+                pixels[y * w + x] = (0xFF shl 24) or (v shl 16) or (v shl 8) or v
+            }
+            return Bitmap.createBitmap(pixels, w, h, Bitmap.Config.ARGB_8888)
+        }
+        if (!src.hasAlpha() && src.config == Bitmap.Config.ARGB_8888) return src
+        val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(out)
+        canvas.drawColor(android.graphics.Color.WHITE)
+        canvas.drawBitmap(src, 0f, 0f, android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG))
+        return out
+    }
+
+    /** Image décodée entièrement noire : signe d'un décodage raté, on garde l'original. */
+    private fun looksBroken(bitmap: Bitmap): Boolean {
+        val step = max(1, max(bitmap.width, bitmap.height) / 64)
+        var total = 0
+        var black = 0
+        var y = 0
+        while (y < bitmap.height) {
+            var x = 0
+            while (x < bitmap.width) {
+                val c = bitmap.getPixel(x, y)
+                total++
+                if ((c shr 16 and 0xFF) < 12 && (c shr 8 and 0xFF) < 12 && (c and 0xFF) < 12) black++
+                x += step
+            }
+            y += step
+        }
+        return total > 0 && black > total * 0.97
+    }
+
+    /**
+     * Parcourt le contenu des pages pour connaître la taille à laquelle chaque image est
+     * réellement affichée (en points), y compris dans les objets de formulaire imbriqués.
+     */
+    private class ImageSizes : com.tom_roush.pdfbox.contentstream.PDFStreamEngine() {
+        val sizes = IdentityHashMap<COSBase, FloatArray>()
+
+        init {
+            addOperator(com.tom_roush.pdfbox.contentstream.operator.state.Concatenate())
+            addOperator(com.tom_roush.pdfbox.contentstream.operator.state.Save())
+            addOperator(com.tom_roush.pdfbox.contentstream.operator.state.Restore())
+            addOperator(com.tom_roush.pdfbox.contentstream.operator.state.SetMatrix())
+            addOperator(com.tom_roush.pdfbox.contentstream.operator.state.SetGraphicsStateParameters())
+            addOperator(com.tom_roush.pdfbox.contentstream.operator.DrawObject())
+        }
+
+        override fun processOperator(operator: com.tom_roush.pdfbox.contentstream.operator.Operator?, operands: MutableList<COSBase>?) {
+            if (operator?.name == "Do") {
+                val name = operands?.firstOrNull() as? COSName
+                val xObject = name?.let { runCatching { resources?.getXObject(it) }.getOrNull() }
+                if (xObject is PDImageXObject) {
+                    val m = graphicsState.currentTransformationMatrix
+                    val w = kotlin.math.hypot(m.scaleX.toDouble(), m.shearY.toDouble()).toFloat()
+                    val h = kotlin.math.hypot(m.shearX.toDouble(), m.scaleY.toDouble()).toFloat()
+                    val prev = sizes[xObject.cosObject]
+                    sizes[xObject.cosObject] = if (prev == null) floatArrayOf(w, h) else floatArrayOf(max(prev[0], w), max(prev[1], h))
+                }
+            }
+            super.processOperator(operator, operands)
         }
     }
 
