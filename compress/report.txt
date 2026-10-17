@@ -1,0 +1,4 @@
+original	2335666
+BEST	175839	images=2
+BALANCED	99193	images=2
+STRONG	65798	images=2
