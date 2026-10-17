@@ -136,21 +136,37 @@ object PdfTools {
         }
     }
 
-    /** Espaces de couleur que le décodeur gère sans approximation (pas de tons directs ni CMJN). */
-    private fun safeColorSpace(image: PDImageXObject): Boolean {
-        val cs = runCatching { image.colorSpace }.getOrNull() ?: return false
-        return when (cs) {
-            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceRGB,
-            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceGray -> true
-            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDICCBased -> cs.numberOfComponents == 1 || cs.numberOfComponents == 3
-            is com.tom_roush.pdfbox.pdmodel.graphics.color.PDIndexed -> {
-                val base = cs.baseColorSpace
-                base is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceRGB ||
-                    base is com.tom_roush.pdfbox.pdmodel.graphics.color.PDDeviceGray ||
-                    (base is com.tom_roush.pdfbox.pdmodel.graphics.color.PDICCBased && base.numberOfComponents in setOf(1, 3))
+    /**
+     * Espaces de couleur que le décodeur gère sans approximation : RVB, gris, ICC à 1 ou 3
+     * composantes, et palettes construites sur ceux-ci. Pas de tons directs ni de CMJN.
+     * Lu directement dans le dictionnaire (PdfBox-Android n'expose pas toutes les classes).
+     */
+    private fun safeColorSpace(image: PDImageXObject): Boolean =
+        isSafeSpace(image.cosObject.getDictionaryObject(COSName.COLORSPACE, COSName.CS), allowIndexed = true)
+
+    private fun isSafeSpace(cs: COSBase?, allowIndexed: Boolean): Boolean {
+        val value = if (cs is com.tom_roush.pdfbox.cos.COSObject) cs.getObject() else cs
+        return when (value) {
+            is COSName -> value == COSName.DEVICERGB || value == COSName.DEVICEGRAY
+            is com.tom_roush.pdfbox.cos.COSArray -> {
+                val family = value.getObject(0) as? COSName ?: return false
+                when (family.name) {
+                    "ICCBased" -> {
+                        val profile = value.getObject(1) as? com.tom_roush.pdfbox.cos.COSStream ?: return false
+                        profile.getInt(COSName.N) in setOf(1, 3)
+                    }
+                    "Indexed", "I" -> allowIndexed && value.size() >= 4 && isSafeSpace(value.get(1), allowIndexed = false)
+                    else -> false
+                }
             }
             else -> false
         }
+    }
+
+    private fun isIndexed(image: PDImageXObject): Boolean {
+        val cs = image.cosObject.getDictionaryObject(COSName.COLORSPACE, COSName.CS)
+        val name = (cs as? com.tom_roush.pdfbox.cos.COSArray)?.getObject(0) as? COSName
+        return name?.name == "Indexed" || name?.name == "I"
     }
 
     private fun recompress(doc: PDDocument, image: PDImageXObject, page: PDPage, shownPts: FloatArray?, level: Level): PDImageXObject? {
@@ -158,8 +174,7 @@ object PdfTools {
         // Transparence, masques, tons directs, CMJN, inversions : laissés tels quels pour ne rien dégrader
         if (image.isStencil || stream.containsKey(COSName.SMASK) || stream.containsKey(COSName.MASK)) return null
         if (stream.containsKey(COSName.DECODE) || !safeColorSpace(image)) return null
-        val indexed = runCatching { image.colorSpace }.getOrNull() is com.tom_roush.pdfbox.pdmodel.graphics.color.PDIndexed
-        if (image.bitsPerComponent !in setOf(8, 16) && !indexed) return null
+        if (image.bitsPerComponent !in setOf(8, 16) && !isIndexed(image)) return null
         if (image.suffix == "jpx" || image.suffix == "jb2") return null
         val originalSize = stream.length
         if (originalSize < 16 * 1024) return null
