@@ -22,8 +22,8 @@ android {
         applicationId = "com.ithamedia.pdfsigner"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "3.0"
+        versionCode = 4
+        versionName = "3.1"
         // Écrans d'outils ouvrables par adb uniquement en debug (test sur émulateur)
         manifestPlaceholders["toolsExported"] = "false"
     }
